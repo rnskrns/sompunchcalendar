@@ -335,6 +335,13 @@
             <div id="idPwArea">
                 <input type="text" id="adminId" class="admin-pw" placeholder="아이디 (프로필 이름)" style="margin-bottom: 8px;">
                 <input type="password" id="adminPw" class="admin-pw" placeholder="비밀번호" onkeyup="if(event.key==='Enter') loginAdmin()">
+                
+                <div style="margin: 5px 0 15px 0; text-align: left;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; font-weight: 700; color: #7A5A2F;">
+                        <input type="checkbox" id="stayLoggedIn" style="width: 16px; height: 16px; cursor: pointer;"> 로그인 상태 유지
+                    </label>
+                </div>
+                
                 <p id="pwError" class="pw-error hidden">로그인 정보가 올바르지 않습니다.</p>
             </div>
             

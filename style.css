@@ -29,13 +29,6 @@
 }
 
 @font-face {
-    font-family: 'RomanticGumi';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_four@1.2/JalnanOTF00.woff') format('woff');
-    font-weight: normal;
-    font-display: swap;
-}
-
-@font-face {
     font-family: 'TMoneyDungunbaram';
     src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-07@1.0/TmoneyRoundWindRegular.woff') format('woff');
     font-weight: normal;
@@ -179,7 +172,10 @@ body {
 .calendar-header-top { position: relative !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; }
 .calendar-header-title { display: flex; align-items: center; justify-content: center; gap: 12px; flex: 1; }
 
-#monthDisplay { font-family: 'RomanticGumi', sans-serif !important; }
+#monthDisplay { 
+    font-family: 'RomanticGumi', sans-serif !important; 
+    font-weight: normal !important;            
+}
 #monthDisplay:hover { color: var(--point-pink); }
 
 .memo-btn {
@@ -367,7 +363,7 @@ body {
 
 .favorite-btn { background: transparent; border: none; cursor: pointer; color: #D1D5DB; transition: transform 0.2s, color 0.2s; padding: 0; display: flex; align-items: center; justify-content: center; }
 .favorite-btn:hover { transform: scale(1.15); }
-.favorite-btn.is-favorite { color: #FBBF24; }
+.favorite-btn.is-favorite { color: #FFBEE2; }
 .song-item-left { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 56px; flex-shrink: 0; gap: 6px; }
 .song-clickable { flex: 1; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
 .song-title { font-weight: 700; font-size: 1.1rem; display: block; color: var(--text-dark); font-family: 'AliceDigitalLearning', sans-serif !important; }
@@ -398,7 +394,6 @@ body {
     color: #dc2626; /* 글씨 색상만 더 진한 빨간색으로 변경 */
 }
 .add-song-btn { background: transparent !important; color: #C0B7A9; border: none; width: 48px; height: 48px; cursor: pointer; font-weight: 900; font-size: 42px; display: flex; align-items: center; justify-content: center; line-height: 1; transition: transform 0.2s, color 0.2s; font-family: inherit; padding: 0; flex-shrink: 0 !important; }
-.add-song-btn:hover { transform: scale(1.15); color: #FBBF24; }
 
 .songbook-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
 .songbook-modal.visible { display: flex; }
@@ -412,14 +407,18 @@ body {
 .browser-footer { padding: 16px 24px; background: white; border-top: 1px solid #E5E7EB; display: flex; justify-content: center; align-items: center; }
 .modal-favorite-btn { padding: 12px 30px; border-radius: 999px; border: 2px solid #E5E7EB; background: white; color: #7A7A7A; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; font-family: inherit; }
 .modal-favorite-btn:hover { background: #F3F4F6; border-color: #D1D5DB; }
-.modal-favorite-btn.active { border-color: #FDE047; background: #FFFDF0; color: #D97706; }
+.modal-favorite-btn.active { border-color: #fd47e5; background: #FFFDF0; color: #d906ab; }
 
-.admin-song-form { display: none; background: white; border: 1px solid #F5F5F5; border-radius: 28px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); width: 100%; box-sizing: border-box; }
+.admin-song-form { display: none; background: white; border: 1px solid #F5F5F5; border-radius: 50px !important; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); width: 100%; box-sizing: border-box; }
 .admin-song-form.visible { display: block; animation: fadeInDown 0.3s ease; }
 .admin-form-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
 .admin-input { width: 100%; padding: 14px 16px; border-radius: 20px; border: 1px solid #E5E7EB; background: #F8FAFC; font-size: 1rem; color: var(--text-dark); outline: none; font-family: inherit; }
-.admin-add-btn { background: var(--point-yellow); color: var(--text-dark); border: none; border-radius: 999px; padding: 12px 18px; cursor: pointer; font-weight: 800; transition: transform 0.2s, opacity 0.2s; font-family: inherit; }
-.admin-add-btn:hover { transform: translateY(-1px); opacity: 0.95; }
+.admin-add-btn { background: #ffbdeb; color: var(--text-dark); border: none; border-radius: 999px; padding: 12px 18px; cursor: pointer; font-weight: 800; transition: transform 0.2s, opacity 0.2s; font-family: inherit; }
+.add-song-btn:hover { 
+    transform: scale(1.15); 
+    /* color: #FBBF24; 에서 아래 코드로 변경 */
+    color: var(--point-pink) !important; 
+}
 
 @keyframes fadeInDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -467,7 +466,7 @@ body {
     margin-right: 5px !important;
     font-size: 15px !important;
 }
-.dragging-ghost { background-color: #FFF3B0 !important; opacity: 0.4; border: 2px dashed #EAB308; }
+.dragging-ghost { background-color: #ffb0e7 !important; opacity: 0.4; border: 2px dashed #ea08b2; }
 .event-tag.long-term { position: relative; height: 28px !important; }
 
 .type-개인방송 { background-color: #ffd8ed !important; color: #da3c76 !important; } /* 연한 분홍 배경 */
@@ -552,7 +551,7 @@ body {
 .member-list { max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
 .info-block { background: transparent; padding: 10px 20px; border-radius: 24px; display: flex; flex-direction: column; align-items: center; }
 .month-btn { padding: 15px 0; border-radius: 20px; border: 2px solid #F5F5F5; background: #F9F9F9; font-weight: 800; cursor: pointer; transition: 0.2s; text-align: center; font-family: inherit; }
-.month-btn:hover, .month-btn.active { background: #FDE047; border-color: #FDE047; color: #5D4037; }
+.month-btn:hover, .month-btn.active { background: #ff5fe4; border-color: #ff5fe4; color: #ffffff; }
 
 .loading-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-cream); z-index: 9999;
@@ -570,8 +569,6 @@ body {
 .cute-loading-text span:nth-child(5) { animation-delay: 0.4s; }
 .cute-loading-text span:nth-child(6) { animation-delay: 0.5s; }
 .cute-loading-text span:nth-child(7) { animation-delay: 0.6s; }
-
-@keyframes text-bounce { 0%, 100% { transform: translateY(0); color: #81D4FA; } 50% { transform: translateY(-10px); color: #FDE047; } }
 
 @media screen and (min-width: 1051px) {
     .main-header { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 20px 40px !important; }
@@ -938,7 +935,6 @@ body {
     display: none ; 
 }
 
-.admin-only-btn.admin-visible { 
+.admin-only-btn.is-admin-visible { 
     display: flex !important; 
 }
-

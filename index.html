@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOMPUNCH</title>
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SOMPUNCH">
+    <meta property="og:description" content="방송일정 & 노래책">
+    <link rel="preload" as="image" href="https://i.postimg.cc/g09fnfJ8/Honeycam-2026-06-08-19-02-04.webp">
+    <link rel="preload" as="image" href="https://i.postimg.cc/s2FtvtXY/Honeycam-2026-06-08-19-02-27.webp">
+    <link rel="preload" as="image" href="https://i.postimg.cc/yNqwkwd0/Honeycam-2026-06-08-19-03-16.webp">
+    <link rel="preload" as="image" href="https://i.postimg.cc/k5rkBk48/Honeycam-2026-06-08-19-03-56.webp">
+
+
+    <link rel="shortcut icon" href="https://i.postimg.cc/wvH8j5st/jemog-eul-iblyeoghaejuseyo.png" />
+    <link rel="icon" href="https://i.postimg.cc/wvH8j5st/jemog-eul-iblyeoghaejuseyo.png" type="image/png">
+    
+    <meta property="og:image" content="https://i.postimg.cc/cCgrXc9X/kaechi-hadeseu-hihihoho-mp4-20260609-004449-323.jpg">
+    <meta property="og:url" content="https://sompunchcalendar.vercel.app/">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SOMPUNCH">
+    <meta name="twitter:description" content="방송일정 & 노래책">
+    <meta name="twitter:image" content="https://i.postimg.cc/cCgrXc9X/kaechi-hadeseu-hihihoho-mp4-20260609-004449-323.jpg">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.postimg.cc/wvH8j5st/jemog-eul-iblyeoghaejuseyo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FFFDF0">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="style.css?v=20260607">
+
+    <style>
+        .event-modal-box { box-shadow: 0 10px 30px rgba(122, 60, 122, 0.15); }
+        .event-modal-delete-btn { color: #7A5A2F; } /* 이 부분은 필요시 조절 */        .event-modal-delete-btn:hover { color: #5E3E1A; }
+        .event-modal-grid { display: flex; flex-direction: column; gap: 24px; }
+        .event-modal-left, .event-modal-right { display: flex; flex-direction: column; gap: 18px; }
+        .event-custom-input { width: 100%; padding: 12px 14px; border: 1px solid #D1D5DB; border-radius: 20px; font-size: 14px; background-color: #fafaf9; color: #4E4942; transition: all 0.2s; } /* 10px -> 20px */        
+        .event-custom-input:focus { outline: none; border-color: #cbd5e1; background-color: #ffffff; box-shadow: none; }
+        @media(min-width: 768px) {
+            .event-modal-grid { flex-direction: row; gap: 40px; }
+            .event-modal-left { flex: 1; border-right: 2px dashed #f1f5f9; padding-right: 40px; min-width: 0; }
+            .event-modal-right { flex: 1; min-width: 0; }
+        }
+        @media(min-width: 1025px) {
+            .header-right { justify-self: end !important; width: 100%; }
+            .today-summary { border: 2px solid #fde4f2 !important; box-shadow: 7px 7px 0px #fde4f2 !important; }
+        }
+        .admin-profile-img { display: none; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid transparent; transition: all 0.2s; }
+        #adminBtn.logged-in, #adminBtn.admin-active, body.admin-mode #adminBtn { min-width: 0 !important; width: 36px !important; height: 36px !important; padding: 0 !important; border-radius: 50% !important; background: transparent !important; }
+        #adminBtn.logged-in .login-text, #adminBtn.admin-active .login-text, body.admin-mode #adminBtn .login-text { display: none; }
+        #adminBtn.logged-in .admin-profile-img, #adminBtn.admin-active .admin-profile-img, body.admin-mode #adminBtn .admin-profile-img { display: block; }
+        #adminBtn:hover .admin-profile-img { border-color: var(--point-pink); }
+        @keyframes force-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body id="mainBody">
+
+    <div class="fixed-top-bar">
+        <div class="top-bar-inner">
+            <a href="https://www.sooplive.com/station/ldrboo" target="_blank" rel="noopener noreferrer" class="mobile-top-logo">
+                <img src="https://i.postimg.cc/cC6P6ddL/som.png" alt="sompuch Logo">
+            </a>
+
+            <div class="top-bar-left">
+                <button type="button" class="nav-tab active" data-tab="schedule" onclick="showTab('schedule')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    일정
+                </button>
+                <button type="button" class="nav-tab" data-tab="songbook" onclick="showTab('songbook')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                    노래책
+                </button>
+            </div>
+            
+            <div class="top-bar-right">
+                <a href="https://cafe.naver.com/moomoo" target="_blank" rel="noopener noreferrer" class="sidebar-item" title="팬카페 바로가기">
+                    <img src="https://i.postimg.cc/hvpLmrYy/1.png" alt="Cafe Logo" class="cafe-icon" style="width:20px; height:20px; border-radius:50%;">
+                    <span>팬카페</span>
+                </a>
+                <a href="https://www.youtube.com/@ldrboo" target="_blank" rel="noopener noreferrer" class="top-bar-link yt-link" title="유튜브 바로가기">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+                
+                <div class="top-admin-actions">
+                    <button id="memberManagerBtn" class="top-icon-btn admin-only-btn" title="멤버 관리" onclick="openMemberManager()">
+                    <button id="memberManagerBtn_pc" class="top-icon-btn admin-only-btn" title="멤버 관리" onclick="openMemberManager()">
+                        <svg viewBox="0 0 24 24" width="22" style="fill: #4E4942;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    </button>
+                    <button id="adminBtn" class="top-icon-btn top-text-btn" title="관리자 설정" onclick="promptAdmin(event)">
+                        <span class="login-text">로그인</span>
+                        <img src="https://stimg.sooplive.com/LOGO/ld/ldrboo/ldrboo.jpg" class="admin-profile-img" alt="관리자 프사">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-sidebar">
+        <button type="button" class="sidebar-item active" data-tab="schedule" onclick="showTab('schedule')">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>일정</span>
+        </button>
+        <button type="button" class="sidebar-item" data-tab="songbook" onclick="showTab('songbook')">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            <span>노래책</span>
+        </button>
+        <button class="sidebar-item" onclick="toggleMemo()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>메모</span>
+        </button>
+        <button class="sidebar-item" onclick="toggleUpBoard()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+            <span>UP!</span>
+        </button>
+        <a href="https://cafe.naver.com/moomoo" target="_blank" rel="noopener noreferrer" class="sidebar-item" title="팬카페 바로가기">
+            <div class="cafe-icon-wrapper" style="width:20px; height:20px;">
+                <img src="https://i.postimg.cc/hvpLmrYy/1.png" class="cafe-img-1" style="width:100%; height:100%; border-radius:50%;">
+                <img src="https://i.postimg.cc/nr04mkW3/2.png" class="cafe-img-2" style="width:100%; height:100%; border-radius:50%; display:none;">
+            </div>
+            <span>팬카페</span>
+        </a>        
+        <a href="https://www.youtube.com/@ldrboo" target="_blank" rel="noopener noreferrer" class="sidebar-item yt-link" title="유튜브 바로가기">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            <span>유튜브</span>
+        </a>
+        <button id="memberManagerBtn_pc" class="sidebar-item admin-only-btn" title="멤버 관리" onclick="openMemberManager()">
+            <svg viewBox="0 0 24 24" width="20" height="20" style="fill: #4E4942;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            <span>멤버</span>
+        </button>
+        <button id="adminBtn_pc" class="sidebar-item" title="관리자 설정" onclick="promptAdmin(event)">
+            <svg class="login-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            <img src="https://stimg.sooplive.com/LOGO/ld/ldrboo/ldrboo.jpg" class="admin-profile-img" alt="관리자 프사">
+            <span class="login-text">로그인</span>
+        </button>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="custom-loading-container">
+            <div style="position: relative; width: 180px; height: 180px; display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 100%; border: 5px solid transparent; border-top-color: #ff8cc9; box-sizing: border-box; animation: force-spin 1s linear infinite;"></div>
+                <img id="randomLoadingImg" src="" alt="" style="position: relative; width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 4px solid #ffffff; box-sizing: border-box; z-index: 2;">
+            </div>
+        </div>
+        <div class="cute-loading-text" style="display: none;">
+            <span>L</span><span>O</span><span>A</span><span>D</span><span>I</span><span>N</span><span>G</span>
+        </div>
+    </div>
+
+    <header class="main-header">
+        <div class="header-left"></div>
+        <div class="header-center">
+            <a href="https://www.sooplive.com/station/ldrboo" target="_blank" rel="noopener noreferrer" class="logo-link">
+                <img src="https://i.postimg.cc/cC6P6ddL/som.png" alt="sompunch Logo" class="main-logo" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
+                <div id="fallbackLogo" class="fallback-logo">sompuch</div>
+            </a>
+        </div>
+        <div class="header-right">
+            <div id="todaySchedulePanel" class="today-summary">
+                <h4 class="font-black text-xl mb-4 flex items-center justify-center gap-2" style="font-family: 'AliceDigitalLearning', sans-serif;">TODAY</h4>
+                <div id="summaryContent"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="calendar-top">
+            <div class="calendar-header mt-2">
+                <div class="calendar-header-top" style="position: relative; display: flex; justify-content: center; align-items: center; width: 100%;">
+                    <div class="calendar-header-title">
+                        <button class="nav-btn" onclick="moveMonth(-1)">◀</button>
+                        <h2 id="monthDisplay" class="text-4xl font-black cursor-pointer hover:text-amber-400 transition-colors text-center select-none" style="min-width: 240px;" title="월 선택" onclick="openMonthPicker()"></h2>
+                        <button class="nav-btn" onclick="moveMonth(1)">▶</button>
+                    </div>
+                    <div style="position: absolute; right: 0; display: flex; gap: 10px;">
+                        <button class="memo-btn" onclick="toggleUpBoard()">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>UP!
+                        </button>
+                        <button class="memo-btn" onclick="toggleMemo()">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>메모
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar-body">
+            <div id="calendarMain" class="calendar-main">
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+
+            <button class="mobile-nav-arrow left-arrow" onclick="moveMonth(-1)" aria-label="이전 달"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+            <button class="mobile-nav-arrow right-arrow" onclick="moveMonth(1)" aria-label="다음 달"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+            
+            <div id="memoPanel" class="memo-panel-container">
+                <button class="mobile-player-close" onclick="toggleMobileMemo()" title="닫기" id="mobileMemoCloseBtn" style="display: none;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+                <div class="memo-panel-header">
+                    <div class="memo-tabs">
+                        <button class="memo-tab memo-tab-active" data-tab="메모" onclick="selectMemoTab('메모')">메모</button>
+                        <button class="memo-tab" data-tab="시네티" onclick="selectMemoTab('시네티')">시네티</button>
+                    </div>
+                    <button id="memoAddBtn" class="memo-add-button admin-only-btn" onclick="openMemoInput()">+</button>
+                </div>
+                <div id="memoInputArea" class="memo-input-area hidden">
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <input type="date" id="memoDateInput" class="admin-input" style="flex: 1; padding: 10px; font-size: 14px;" title="일정 날짜">
+                        <input type="time" id="memoTimeInput" class="admin-input" style="flex: 1; padding: 10px; font-size: 14px;" title="일정 시간">
+                    </div>
+                    <textarea id="memoItemText" class="memo-item-input" placeholder="메모 내용을 입력하세요"></textarea>
+                    <div class="memo-input-actions">
+                        <button class="btn btn-cancel" onclick="closeMemoInput()">취소</button>
+                        <button class="btn btn-save" onclick="saveMemoItem()">추가하기</button>
+                    </div>
+                </div>
+                <div id="memoList" class="memo-list"></div>
+            </div>
+
+            <div id="upPanel" class="memo-panel-container">
+                <button class="mobile-player-close" onclick="toggleMobileUpBoard()" title="닫기" id="mobileUpCloseBtn" style="display: none;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+                <div class="memo-panel-header" style="justify-content: center;">
+                    <h3 style="margin: 0; font-family: 'AliceDigitalLearning'; font-weight: 900; color: #0284c7;">당장 UP해!</h3>
+                </div>
+                <div id="upList" class="memo-list" style="padding: 10px;"></div>
+            </div>
+        </div>
+
+        <div id="songbookSection" class="songbook-section">
+            <div class="songbook-sidebar">
+                <div class="artist-list-wrapper"><div class="artist-grid" id="artistList"></div></div>
+            </div>
+
+            <div class="songbook-main-content">
+                <div class="songbook-header">
+                    <div class="search-input-wrapper">
+                        <button id="favFilterBtn" onclick="setSongbookFilter('Favorites')" type="button" title="즐겨찾기"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" /></svg></button>
+                        <input id="songbookSearch" class="songbook-search" type="text" placeholder="노래 제목 또는 가수를 검색하세요" oninput="renderSongbook()">
+                    </div>
+                    <button id="songbookAddBtn" class="add-song-btn admin-only-btn" type="button" onclick="document.getElementById('adminSongForm').classList.add('visible'); document.getElementById('newSongTitle').focus();">+</button>
+                </div>
+                <div id="adminSongForm" class="admin-song-form">
+                    <div class="admin-form-row">
+                        <input id="newSongTitle" class="admin-input" type="text" placeholder="노래 제목">
+                        <input id="newSongArtist" class="admin-input" type="text" placeholder="가수명">
+                        <input id="newSongUrl" class="admin-input" type="text" placeholder="유튜브 또는 링크 주소 (선택)">
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-dark); padding: 4px 8px; cursor: pointer; font-family: 'AliceDigitalLearning', sans-serif;">
+                            <input type="checkbox" id="isConditionSong" style="width: 18px; height: 18px; accent-color: #F48FB1; cursor: pointer;">컨디션곡 (목 상태에 따라 부르는 곡)
+                        </label>
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                        <button class="admin-add-btn" type="button" onclick="addSong()" id="addSongBtn">노래 추가</button>
+                        <button class="admin-add-btn" type="button" onclick="cancelEdit()" style="background: #e5e7eb; color: #6b7280;">취소</button>
+                    </div>
+                </div>
+                <div id="songList" class="songbook-content"></div>
+            </div>
+        </div>
+
+        <div id="browserModal" class="songbook-modal">
+            <div class="browser-container">
+                <div class="browser-header">
+                    <span id="browserTitle" style="font-weight: 800; color: #4E4942; font-family: 'AliceDigitalLearning', sans-serif;">HTVVI 브라우저</span>
+                    <button class="close-browser" onclick="closeBrowser()">닫기</button>
+                </div>
+                <div class="browser-content-wrapper">
+                    <iframe id="browserIframe" class="browser-iframe" allow="autoplay; clipboard-write; web-share;" allowfullscreen="true"></iframe>
+                </div>
+                <div class="browser-footer">
+                    <button id="modalFavoriteBtn" class="modal-favorite-btn" onclick="toggleModalFavorite()">☆ 즐겨찾기 추가</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="eventModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+        <div class="event-modal-box">
+            <button id="delBtn" class="event-modal-delete-btn" onclick="deleteEvent()" style="display: none;" aria-label="삭제">✕</button>
+            <h2 id="modalTitle" style="margin-top: 0; margin-bottom: 30px; font-family: 'RomanticGumi', sans-serif; color: #7A5A2F; font-size: 38px; font-weight: bold; text-align: center; letter-spacing: 1px;">일정 추가</h2>
+            <input type="hidden" id="editIndex" value="-1">
+            <input type="hidden" id="editingEventDocId" value="">
+            <div class="event-modal-grid">
+                <div class="event-modal-left">
+<div style="display: none;"><label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">공지 링크</label><input type="text" id="eventNoticeLink" placeholder="https://..." class="event-custom-input"></div>                    <div>
+                        <label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">시간</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button type="button" id="ampmAM" onclick="setAMPM('오전')" class="ampm-btn active">오전</button>
+                            <button type="button" id="ampmPM" onclick="setAMPM('오후')" class="ampm-btn">오후</button>
+                            <input type="number" id="timeHour" placeholder="시" min="1" max="12" class="event-custom-input" style="width: 70px; text-align: center;"><span style="font-weight: 900;">:</span>
+                            <input type="number" id="timeMin" placeholder="분" min="0" max="59" class="event-custom-input" style="width: 70px; text-align: center;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 14px;">
+                        <div style="flex: 1;"><label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">시작 날짜 *</label><input type="date" id="eventStartDate" class="event-custom-input"></div>
+                        <div style="flex: 1;"><label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">종료 날짜 *</label><input type="date" id="eventEndDate" class="event-custom-input"></div>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">유형</label>
+                        <select id="eventType" class="event-custom-input" style="cursor: pointer; font-weight: bold;">
+                            <option value="개인방송">개인방송</option><option value="합방">합방</option><option value="휴방">휴방</option><option value="시네티">시네티</option><option value="LCK">LCK</option><option value="미확정">미확정</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="event-modal-right">
+                    <div><label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">참여 멤버 (쉼표로 구분)</label><input type="text" id="eventMembers" placeholder="예: 솜주먹, 멤버2" class="event-custom-input"></div>
+                    <div><label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">공지 링크</label><input type="text" id="eventNoticeLink" placeholder="https://..." class="event-custom-input"></div>
+                    <div>
+                        <label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">포스터 / 썸네일 이미지</label>
+                        <input type="file" id="eventImgFile" accept="image/*" onchange="handleEventImgUpload(this)" style="display: block; margin-bottom: 12px; font-size: 13px; color: #64748b; cursor: pointer;">
+                        <input type="hidden" id="eventImageUrl">
+                        <div id="imagePreviewContainer" style="text-align: center; background: #fafaf9; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e1;"><img id="eventImagePreview" src="" alt="미리보기" style="display: none; max-width: 100%; max-height: 160px; border-radius: 8px; margin: 0 auto 12px auto;"><p id="eventImagePlaceholder" style="color: #94a3b8; font-size: 13px; margin: 0; font-weight: bold;">이미지를 업로드하면 여기에 표시됩니다</p><button type="button" id="removeImageBtn" onclick="removeEventImage()" style="display: none; background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold;">이미지 지우기 ✕</button></div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 36px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
+                <button onclick="closeModal('eventModal')" style="padding: 12px 24px; background: #f1f5f9; color: #64748b; border: none; border-radius: 999px; cursor: pointer; font-weight: 800;">취소</button>
+                <button onclick="saveEvent()" style="padding: 12px 24px; background: #FDE047; color: #7A5A2F; border: none; border-radius: 999px; cursor: pointer; font-weight: 800;">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="infoModal" class="modal"><div class="modal-content"><div id="infoTitle" class="info-title"></div><div class="info-block"><div id="infoTime" class="time-badge"></div><div id="infoImageContainer" class="info-image-container"></div><div id="infoProfiles" class="profile-list"></div><div id="infoNoticePreview" class="notice-preview"></div></div><button class="btn btn-cancel" style="margin-top: 15px;" onclick="closeModal('infoModal')">닫기</button></div></div>
+    
+    <div id="pwModal" class="modal">
+        <div class="modal-content pw-modal" style="max-width: 400px;">
+            <h3 class="text-center font-black mb-5" style="font-size:24px;">관리자 인증</h3>
+            
+            <div id="profileSelectionArea" style="display:none; margin-bottom: 20px;">
+                <p style="text-align:center; font-weight:bold; color:#7A5A2F; margin-bottom: 12px;">누가 로그인하나요?</p>
+                <div id="adminProfileList" style="display:flex; gap:12px; overflow-x:auto; padding-bottom:10px; justify-content:center;"></div>
+                <hr style="border: 0; border-top: 1px dashed #E5E7EB; margin: 15px 0;">
+            </div>
+
+            <div id="idPwArea">
+                <input type="text" id="adminId" class="admin-pw" placeholder="아이디 (프로필 이름)" style="margin-bottom: 8px;">
+                <input type="password" id="adminPw" class="admin-pw" placeholder="비밀번호" onkeyup="if(event.key==='Enter') loginAdmin()">
+                <p id="pwError" class="pw-error hidden">로그인 정보가 올바르지 않습니다.</p>
+            </div>
+            
+            <div class="btn-group" style="margin-top: 20px;">
+                <button class="btn btn-cancel" onclick="closeModal('pwModal')">취소</button>
+                <button class="btn btn-save" onclick="loginAdmin()">로그인</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="memberModal" class="modal"><div class="modal-content"><h3 class="modal-title">멤버 관리</h3><div id="memberList" class="member-list"></div><div class="member-add-box"><h4 style="font-weight:900; margin-bottom:12px;">새 멤버 추가</h4><input type="text" id="newMemberName" class="admin-input" placeholder="멤버 이름 (닉네임)" style="margin-bottom: 8px;"><input type="text" id="newMemberId" class="admin-input" placeholder="SOOP 아이디" style="margin-bottom: 12px;"><input type="hidden" id="newMemberImg"><button class="btn btn-save" style="width:100%; padding:14px;" onclick="addMember()">추가하기</button></div><button class="btn btn-cancel" style="margin-top:15px;" onclick="closeModal('memberModal')">닫기</button></div></div>
+    
+    <div id="confirmModal" class="modal"><div class="modal-content" style="max-width: 320px; align-items: center; text-align: center;"><h3 id="confirmMessage" class="font-black text-lg mb-6"></h3><div class="btn-group" style="width: 100%;"><button class="btn btn-cancel" onclick="closeModal('confirmModal')">취소</button><button id="confirmBtn" class="btn btn-danger">삭제</button></div></div></div>
+    
+    <div id="monthPickerModal" class="modal"><div class="modal-content" style="max-width: 380px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;"><button class="nav-btn" onclick="changePickerYear(-1)">◀</button><h3 id="pickerYearDisplay" class="font-black text-2xl m-0"></h3><button class="nav-btn" onclick="changePickerYear(1)">▶</button></div><div class="month-picker-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div><button class="btn btn-cancel mt-6" onclick="closeModal('monthPickerModal')">닫기</button></div></div>
+
+    <div id="popupAdminModal" class="modal"><div class="modal-content" style="max-width: 420px; padding: 25px;"><h3 class="modal-title" style="text-align: center; margin-bottom: 20px;">관리자 설정</h3><div class="form-group" style="margin-bottom: 24px;"><label style="font-weight: bold; margin-bottom: 8px; display: block;">입장 팝업 상단 이미지</label><input type="file" id="popupImgFileInput" accept="image/*" onchange="handlePopupImgUpload(this)" style="display: block; margin-bottom: 10px; font-size: 13px; color: #64748b; cursor: pointer; width: 100%;"><div style="display: flex; gap: 8px;"><input type="text" id="popupImageUrlInput" placeholder="https://..." style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd;"><button class="btn btn-save" style="padding: 10px 16px; margin: 0; flex-shrink: 0;" onclick="savePopupImage()">적용</button><button type="button" onclick="deletePopupImage()" style="background: #ef4444; color: white; padding: 10px 16px; margin: 0; flex-shrink: 0; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">삭제</button></div></div><hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;"><div class="form-group" style="margin-bottom: 0;"><label style="font-weight: bold; margin-bottom: 8px; display: block;">새 UP! 링크 추가</label><input type="text" id="upTitleInput" class="admin-input" placeholder="컨텐츠 이름" style="margin-bottom: 8px;"><input type="url" id="upLinkInput" class="admin-input" placeholder="링크 주소 (https://...)" style="margin-bottom: 8px;"><input type="date" id="upDeadlineInput" class="admin-input" title="마감 날짜" style="margin-bottom: 12px;"><button class="btn btn-save" style="width: 100%; padding: 12px; margin: 0;" onclick="saveUpItem()">UP! 추가하기</button></div><button class="btn btn-cancel" style="margin-top: 20px; width: 100%;" onclick="closeModal('popupAdminModal')">닫기</button></div></div>
+    
+    <div id="upPopupModal" class="modal"><div class="modal-content" style="max-width: 550px; min-height: 300px; padding: 30px; overflow-y: auto;"><div id="popupUpList" style="margin-bottom: 20px;"></div><div style="display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-top: auto;"><label style="font-size: 13px; color: #7a7a7a; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" id="hidePopupToday" style="accent-color: #EAB308; width: 16px; height: 16px;">오늘 하루 안 보기</label><button class="btn btn-save" style="padding: 10px 20px; font-size: 14px; flex: none;" onclick="closeUpPopup()">닫기</button></div></div></div>
+
+    <nav class="mobile-bottom-nav">
+        <button class="nav-item" onclick="showTab('schedule')">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>일정</span>
+        </button>
+        <button class="nav-item" onclick="showTab('songbook')">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            <span>노래책</span>
+        </button>
+        <button class="nav-item" onclick="toggleMobileUpBoard()">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+            <span>UP!</span>
+        </button>
+        <button class="nav-item" onclick="toggleMobileMemo()">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>메모</span>
+        </button>
+    </nav>
+
+    <div id="toastMessage"></div>
+
+    <script type="module" src="script.js?v=20260607"></script>
+</body>
+</html>

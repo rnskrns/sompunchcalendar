@@ -1,0 +1,13 @@
+{
+  "name": "Sompunch Calendar",
+  "short_name": "Sompunch",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/cCgrXc9X/kaechi-hadeseu-hihihoho-mp4-20260609-004449-323.jpg",
+      "sizes": "192x192",
+      "type": "image/jpg",
+      "purpose": "any maskable"
+    }
+  ],
+  "display": "standalone"
+}

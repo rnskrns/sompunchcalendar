@@ -123,7 +123,9 @@ window.loginWithProfile = function(token) {
 }
 
 function setAdminSession(profile) {
-    sessionStorage.setItem('sompunch_admin_session', profile.token);
+    // 프로필 클릭 로그인은 '로그인 유지'를 의도한 것으로 간주하고 localStorage에 저장합니다.
+    localStorage.setItem('sompunch_admin_session', profile.token);
+    
     isAdmin = true;
     currentAdminProfile = profile;
     updateAdminUI();

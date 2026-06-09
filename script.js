@@ -1050,7 +1050,7 @@ window.renderDayManagerList = function() {
                 </div>
                 <div class="mgr-divider" style="border-left: 1px solid #e2e8f0; margin: 0 10px;"></div>
                 <div class="mgr-col" style="flex:1; min-width:300px; display:flex; flex-direction:column; gap:12px;">
-                    <div><label style="display:block; font-weight:800; color:#7A5A2F; font-size:14px; margin-bottom:4px;">참여 멤버</label><input type="text" class="event-custom-input mgr-members" value="${item.members || ''}"></div>
+                    <div><label style="display:block; font-weight:800; color:#7A5A2F; font-size:14px; margin-bottom:4px;">참여 멤버 (쉼표로 구분)</label><input type="text" class="event-custom-input mgr-members" value="${item.members || ''}" placeholder="예시) 솜주먹,멤버2,멤버3"></div>
                     <div>
                         <label style="display:block; font-weight:800; color:#7A5A2F; font-size:14px; margin-bottom:4px;">이미지 URL</label>
                         <div style="display:flex; gap:8px;">

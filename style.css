@@ -405,15 +405,15 @@ body {
 .songbook-modal.visible { display: flex; }
 
 .browser-container { width: min(90%, 1080px); max-height: 92vh; background: white; border-radius: 32px; overflow: hidden; display: flex; flex-direction: column; }
-.browser-header { background: #f3f4f6; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; }
-.close-browser { background: #81D4FA; color: #01579B; border: none; padding: 5px 15px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: background-color 0.2s; font-family: inherit; }
-.close-browser:hover { background: #4FC3F7; }
-.browser-content-wrapper { flex: 1; padding: 24px; background: #FFFDF5; display: flex; flex-direction: column; min-height: 0; }
+.browser-header { background: #ffffff; padding: 15px 20px; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #e5e7eb; position: relative; }
+.close-browser { position: absolute; right: 30px; background: transparent; color: #FFBEE2; border: none; padding: 0; cursor: pointer; font-weight: 900; font-size: 24px; transition: transform 0.2s, color 0.2s; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; line-height: 1; }
+.close-browser:hover { background: transparent; color: #FFA8D5; transform: scale(1.1); }
+.browser-content-wrapper { flex: 1; padding: 24px; background: #ffffff; display: flex; flex-direction: column; min-height: 0; }
 .browser-iframe { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #000; }
 .browser-footer { padding: 16px 24px; background: white; border-top: 1px solid #E5E7EB; display: flex; justify-content: center; align-items: center; }
 .modal-favorite-btn { padding: 12px 30px; border-radius: 999px; border: 2px solid #E5E7EB; background: white; color: #7A7A7A; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; font-family: inherit; }
 .modal-favorite-btn:hover { background: #F3F4F6; border-color: #D1D5DB; }
-.modal-favorite-btn.active { border-color: #fd47e5; background: #FFFDF0; color: #d906ab; }
+.modal-favorite-btn.active { border-color: #FFBEE2; background: #ffffff; color: #FFA8D5; }
 
 .admin-song-form { display: none; background: white; border: 1px solid #F5F5F5; border-radius: 50px !important; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); width: 100%; box-sizing: border-box; }
 .admin-song-form.visible { display: block; animation: fadeInDown 0.3s ease; }

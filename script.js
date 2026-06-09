@@ -2269,7 +2269,28 @@ window.showTab = async function(tab) {
     const todaySchedulePanel = document.getElementById('todaySchedulePanel');
     const loadingOverlay = document.getElementById('loadingOverlay');
 
-    if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+    let needsDataLoad = false;
+    if (tab === 'songbook') {
+        needsDataLoad = !isSongbookLoaded;
+    } else {
+        const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}`;
+        needsDataLoad = !loadedMonths.has(monthKey);
+        const isMobile = window.innerWidth < 1050;
+        if (isMobile) {
+            const target = new Date(currentDate);
+            const dayNum = target.getDay();
+            const diff = target.getDate() - dayNum + (dayNum === 0 ? -6 : 1);
+            const monday = new Date(target.setDate(diff));
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            if (monday.getMonth() !== currentDate.getMonth() && !loadedMonths.has(`${monday.getFullYear()}-${monday.getMonth() + 1}`)) needsDataLoad = true;
+            if (sunday.getMonth() !== currentDate.getMonth() && !loadedMonths.has(`${sunday.getFullYear()}-${sunday.getMonth() + 1}`)) needsDataLoad = true;
+        }
+    }
+
+    if (needsDataLoad && loadingOverlay) {
+        loadingOverlay.classList.remove('hidden');
+    }
 
     if (tab === 'songbook') {
         if(calendarTop) calendarTop.style.display = 'none';
@@ -2279,8 +2300,8 @@ window.showTab = async function(tab) {
         window.location.hash = '#songbook';
         
         try {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            if (!isSongbookLoaded) {
+            if (needsDataLoad) {
+                await new Promise(resolve => setTimeout(resolve, 500));
                 await loadSongbookSongs();
                 isSongbookLoaded = true;
                 renderSongbook();
@@ -2296,10 +2317,10 @@ window.showTab = async function(tab) {
         if(todaySchedulePanel) todaySchedulePanel.style.display = 'block';
         window.location.hash = '#schedule';
 
-        if (loadingOverlay) loadingOverlay.classList.remove('hidden');
-
         try {
-            await new Promise(resolve => setTimeout(resolve, 500)); 
+            if (needsDataLoad) {
+                await new Promise(resolve => setTimeout(resolve, 500)); 
+            }
             await ensureMonthsLoadedForDate(currentDate);
             renderCalendar();
         } catch (error) {

@@ -2269,6 +2269,8 @@ window.showTab = async function(tab) {
     const todaySchedulePanel = document.getElementById('todaySchedulePanel');
     const loadingOverlay = document.getElementById('loadingOverlay');
 
+    if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+
     if (tab === 'songbook') {
         if(calendarTop) calendarTop.style.display = 'none';
         if(calendarBody) calendarBody.style.display = 'none';
@@ -2276,11 +2278,16 @@ window.showTab = async function(tab) {
         if(todaySchedulePanel) todaySchedulePanel.style.display = 'none';
         window.location.hash = '#songbook';
         
-        if (!isSongbookLoaded) {
-            await loadSongbookSongs();
-            isSongbookLoaded = true;
-            renderSongbook();
-            updateFavPlayerPlaylist();
+        try {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (!isSongbookLoaded) {
+                await loadSongbookSongs();
+                isSongbookLoaded = true;
+                renderSongbook();
+                updateFavPlayerPlaylist();
+            }
+        } finally {
+            if (loadingOverlay) loadingOverlay.classList.add('hidden');
         }
     } else {
         if(calendarTop) calendarTop.style.display = 'flex';
@@ -2292,7 +2299,7 @@ window.showTab = async function(tab) {
         if (loadingOverlay) loadingOverlay.classList.remove('hidden');
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 50)); 
+            await new Promise(resolve => setTimeout(resolve, 500)); 
             await ensureMonthsLoadedForDate(currentDate);
             renderCalendar();
         } catch (error) {
@@ -2503,7 +2510,7 @@ window.onload = async () => {
 
     setTimeout(() => {
         const loadingOverlay = document.getElementById('loadingOverlay');
-        if (loadingOverlay) { loadingOverlay.classList.add('hidden'); setTimeout(() => { loadingOverlay.remove(); }, 500); }
+        if (loadingOverlay) { loadingOverlay.classList.add('hidden'); }
     }, 1000);
 };
 
@@ -2519,10 +2526,10 @@ window.addEventListener('error', () => {
 });
 
 const loadingGifs = [
-    "https://i.postimg.cc/g09fnfJ8/Honeycam-2026-06-08-19-02-04.webp",
-    "https://i.postimg.cc/s2FtvtXY/Honeycam-2026-06-08-19-02-27.webp",
-    "https://i.postimg.cc/yNqwkwd0/Honeycam-2026-06-08-19-03-16.webp",
-    "https://i.postimg.cc/k5rkBk48/Honeycam-2026-06-08-19-03-56.webp",
+    "https://i.postimg.cc/wMfKnTD7/somload-(1).webp",
+    "https://i.postimg.cc/C5Py9LbB/somload-(2).webp",
+    "https://i.postimg.cc/x8xrBTLN/somload-(3).webp",
+    "https://i.postimg.cc/9083sFyz/somload-(4).webp",
 ];
 
 const randomLoadingImg = document.getElementById('randomLoadingImg');

@@ -560,15 +560,7 @@ body {
 .loading-overlay.hidden { opacity: 0; pointer-events: none; }
 .mobile-nav-arrow { display: none; }
 
-.cute-loading-text { font-family: 'KerisKeduLine', sans-serif; font-size: 38px; font-weight: normal; letter-spacing: 6px; display: flex; gap: 4px; color: #81D4FA; }
-.cute-loading-text span { display: inline-block; animation: text-bounce 1s infinite; }
-.cute-loading-text span:nth-child(1) { animation-delay: 0.0s; }
-.cute-loading-text span:nth-child(2) { animation-delay: 0.1s; }
-.cute-loading-text span:nth-child(3) { animation-delay: 0.2s; }
-.cute-loading-text span:nth-child(4) { animation-delay: 0.3s; }
-.cute-loading-text span:nth-child(5) { animation-delay: 0.4s; }
-.cute-loading-text span:nth-child(6) { animation-delay: 0.5s; }
-.cute-loading-text span:nth-child(7) { animation-delay: 0.6s; }
+.cute-loading-text { display: none !important; }
 
 @media screen and (min-width: 1051px) {
     .main-header { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 20px 40px !important; }

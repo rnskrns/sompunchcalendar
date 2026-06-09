@@ -1027,7 +1027,7 @@ window.renderDayManagerList = function() {
             body.className = 'mgr-body';
             body.style.cssText = 'padding:24px; display:flex; gap:20px; flex-wrap:wrap; background:#ffffff;';
             
-            const types = ['개인방송', '합방', '휴방', '미확정', 'LCK', '시네티'];
+            const types = ['개인방송', '합방', '휴방', '미확정', '시네티'];
             let typeOpts = types.map(t => `<option value="${t}" ${item.type === t ? 'selected' : ''}>${t}</option>`).join('');
             
             body.innerHTML = `
@@ -1291,9 +1291,6 @@ function renderCalendar() {
                             } else if (ev.type === '합방') {
                                 bgColor = '#FDF0D5'; // 베이지 배경
                                 textColor = '#D81B60'; // 진한 분홍 글씨
-                            } else if (ev.type === 'LCK') {
-                                bgColor = '#FFE0B2';
-                                textColor = '#E65100';
                             } else if (ev.type === '시네티') {
                                 bgColor = '#DCEDC8';
                                 textColor = '#33691E';
@@ -2076,12 +2073,16 @@ function renderSongbook() {
                 overflow-y: auto !important;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: thin;
+                        scrollbar-color: #FFBEE2 transparent;
             }
             /* 스크롤바 투명/얇게 설정 */
             #songList::-webkit-scrollbar { width: 6px; }
-            #songList::-webkit-scrollbar-thumb { 
-                background: rgba(122, 90, 47, 0.2); /* 고동색 계열 투명도 조절 */
+            #songList::-webkit-scrollbar-thumb, .artist-list-wrapper::-webkit-scrollbar-thumb { 
+                background: #FFBEE2 !important; 
                 border-radius: 10px; 
+            }
+            #songList::-webkit-scrollbar-thumb:hover, .artist-list-wrapper::-webkit-scrollbar-thumb:hover { 
+                background: #FFA8D5 !important; 
             }
             #songList::-webkit-scrollbar-track { background: transparent; }
         `;

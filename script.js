@@ -2040,7 +2040,10 @@ async function loadSongbookSongs() {
     const localCache = JSON.parse(localStorage.getItem('htvvi_songs_cache') || '{"time": 0, "data": []}');
 
     if (localCache.time >= serverTime && localCache.data.length > 0 && serverTime !== 0) {
-        songbookSongs = localCache.data;
+        songbookSongs = localCache.data.map(song => ({
+            ...song,
+            note: song.note !== undefined ? song.note : (song.isConditionSong ? '컨디션곡' : '')
+        }));
     } else {
         songbookSongs = [];
         try {
@@ -2048,7 +2051,7 @@ async function loadSongbookSongs() {
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
                 if (data && data.title && data.artist) {
-                    songbookSongs.push({ id: docSnap.id, title: data.title, artist: data.artist, url: data.url || '', isConditionSong: data.isConditionSong || false });
+                    songbookSongs.push({ id: docSnap.id, title: data.title, artist: data.artist, url: data.url || '', note: data.note !== undefined ? data.note : (data.isConditionSong ? '컨디션곡' : '') });
                 }
             });
             localStorage.setItem('htvvi_songs_cache', JSON.stringify({ time: serverTime || new Date().getTime(), data: songbookSongs }));
@@ -2104,7 +2107,7 @@ function renderSongbook() {
         const isFav = favorites.includes(song.id);
         const favIcon = isFav ? starSolid : starOutline; const favClass = isFav ? 'is-favorite' : '';
         const safeUrl = song.url ? song.url.replace(/'/g, "\\'") : ''; const safeTitle = song.title ? song.title.replace(/'/g, "\\'") : '';
-        const conditionBadge = song.isConditionSong ? `<span class="condition-badge">컨디션곡</span>` : '';
+        const conditionBadge = song.note ? `<span class="condition-badge">${song.note}</span>` : '';
 
         songListDiv.innerHTML += `
             <div class="song-item" oncontextmenu="editSong(event, '${song.id}')">
@@ -2185,7 +2188,12 @@ function editSong(event, id) {
     if (!isAdmin) return true;
     event.preventDefault(); const song = songbookSongs.find(item => item.id === id); if (!song) return false;
     document.getElementById('newSongTitle').value = song.title; document.getElementById('newSongArtist').value = song.artist;
-    document.getElementById('newSongUrl').value = song.url; document.getElementById('isConditionSong').checked = song.isConditionSong || false;
+    document.getElementById('newSongUrl').value = song.url; 
+    const noteInput = document.getElementById('songNote') || document.getElementById('isConditionSong');
+    if (noteInput) {
+        if (noteInput.type === 'checkbox') noteInput.checked = song.note ? true : false;
+        else noteInput.value = song.note || '';
+    }
     document.getElementById('adminSongForm').classList.add('visible'); songbookIsEditing = id; document.getElementById('addSongBtn').textContent = '수정 저장';
     return false;
 }
@@ -2201,19 +2209,29 @@ async function addSong() {
     const title = document.getElementById('newSongTitle').value.trim();
     const artist = document.getElementById('newSongArtist').value.trim();
     const url = document.getElementById('newSongUrl').value.trim();
-    const isConditionSong = document.getElementById('isConditionSong').checked;
+    
+    const noteInput = document.getElementById('songNote') || document.getElementById('isConditionSong');
+    let note = '';
+    if (noteInput) {
+        if (noteInput.type === 'checkbox') note = noteInput.checked ? '컨디션곡' : '';
+        else note = noteInput.value.trim();
+    }
     
     if (!title || !artist) { showToast('노래 제목과 가수명을 입력해주세요.'); return; }
     try {
         if (songbookIsEditing !== null) {
-            await setDoc(doc(db, 'songbook_songs', songbookIsEditing), { title, artist, url, isConditionSong });
+            await setDoc(doc(db, 'songbook_songs', songbookIsEditing), { title, artist, url, note });
             songbookIsEditing = null;
-        } else { await addDoc(collection(db, 'songbook_songs'), { title, artist, url, isConditionSong }); }
+        } else { await addDoc(collection(db, 'songbook_songs'), { title, artist, url, note }); }
         
         await updateDbStatus(); 
 
         document.getElementById('newSongTitle').value = ''; document.getElementById('newSongArtist').value = '';
-        document.getElementById('newSongUrl').value = ''; document.getElementById('isConditionSong').checked = false;
+        document.getElementById('newSongUrl').value = ''; 
+        if (noteInput) {
+            if (noteInput.type === 'checkbox') noteInput.checked = false;
+            else noteInput.value = '';
+        }
         document.getElementById('addSongBtn').textContent = '노래 추가';
         document.getElementById('adminSongForm').classList.remove('visible');
 
@@ -2223,7 +2241,12 @@ async function addSong() {
 
 function cancelEdit() {
     document.getElementById('newSongTitle').value = ''; document.getElementById('newSongArtist').value = '';
-    document.getElementById('newSongUrl').value = ''; document.getElementById('isConditionSong').checked = false;
+    document.getElementById('newSongUrl').value = ''; 
+    const noteInput = document.getElementById('songNote') || document.getElementById('isConditionSong');
+    if (noteInput) {
+        if (noteInput.type === 'checkbox') noteInput.checked = false;
+        else noteInput.value = '';
+    }
     songbookIsEditing = null; document.getElementById('addSongBtn').textContent = '노래 추가';
     document.getElementById('adminSongForm').classList.remove('visible');
 }

@@ -2587,6 +2587,175 @@ window.showDayInfo = function(dateId, dayEvents) {
     document.getElementById('dayInfoModal').style.display = 'flex';
 };
 
+window.openTextCopyModal = function() {
+    let modal = document.getElementById('textCopyModal');
+    
+    // 팝업이 없거나 기존의 고장 난 팝업이라면 강제로 지우고 새로 완벽하게 주입합니다.
+    if (!modal || modal.dataset.injected !== 'true') {
+        if (modal) modal.remove();
+        
+        const html = `
+        <div id="textCopyModal" data-injected="true" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center; backdrop-filter:blur(2px);">
+            <div style="background:#fff; padding:32px 40px; border-radius:30px; display:flex; flex-direction:column; gap:16px; width:90%; max-width:550px; box-shadow:0 10px 25px rgba(0,0,0,0.1);">
+                <h2 style="margin:0; font-family:'RomanticGumi', sans-serif; color:#7A5A2F; font-size:24px; text-align:center;">일정 복사하기</h2>
+                
+                <!-- Step 1: 날짜 선택 -->
+                <div id="textCopyStep1" style="display:flex; flex-direction:column; gap:12px;">
+                    <div>
+                        <label style="display:block; font-weight:800; margin-bottom:6px; color:#7A5A2F;">시작 날짜</label>
+                        <input type="date" id="copyStartDate" class="event-custom-input">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:800; margin-bottom:6px; color:#7A5A2F;">종료 날짜</label>
+                        <input type="date" id="copyEndDate" class="event-custom-input">
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button onclick="closeModal('textCopyModal')" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#f1f5f9; color:#64748b; font-weight:bold; font-size:15px;">취소</button>
+                        <button onclick="generateScheduleText()" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#fdb6ff; color:#7A5A2F; font-weight:bold; font-size:15px;">확인</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: 미리보기 및 복사 -->
+                <div id="textCopyStep2" style="display:none; flex-direction:column; gap:12px;">
+                    <div>
+                        <label style="display:block; font-weight:800; margin-bottom:6px; color:#7A5A2F;">미리보기</label>
+                        <textarea id="scheduleTextPreview" class="event-custom-input" style="min-height: 400px; resize: vertical; font-family: inherit; font-size: 14px; line-height: 1.5; background: #fafaf9; text-align: center; border-radius: 16px;" readonly></textarea>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button onclick="window.resetTextCopyModal()" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#f1f5f9; color:#64748b; font-weight:bold; font-size:15px;">다시 선택</button>
+                        <button onclick="copyScheduleText()" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#fdb6ff; color:#7A5A2F; font-weight:bold; font-size:15px;">복사하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', html);
+        modal = document.getElementById('textCopyModal');
+    }
+
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(today.setDate(diff));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    
+    const pad = n => String(n).padStart(2, '0');
+    document.getElementById('copyStartDate').value = `${monday.getFullYear()}-${pad(monday.getMonth()+1)}-${pad(monday.getDate())}`;
+    document.getElementById('copyEndDate').value = `${sunday.getFullYear()}-${pad(sunday.getMonth()+1)}-${pad(sunday.getDate())}`;
+    
+    window.resetTextCopyModal();
+    document.getElementById('textCopyModal').style.display = 'flex';
+    modal.style.setProperty('display', 'flex', 'important');
+};
+
+window.resetTextCopyModal = function() {
+    document.getElementById('textCopyStep1').style.display = 'flex';
+    document.getElementById('textCopyStep2').style.display = 'none';
+};
+
+window.generateScheduleText = function() {
+    const startStr = document.getElementById('copyStartDate').value;
+    const endStr = document.getElementById('copyEndDate').value;
+    
+    if (!startStr || !endStr) return showToast('날짜를 모두 선택해주세요.');
+    
+    const sParts = startStr.split('-');
+    const startDate = new Date(sParts[0], parseInt(sParts[1]) - 1, sParts[2]);
+    const eParts = endStr.split('-');
+    const endDate = new Date(eParts[0], parseInt(eParts[1]) - 1, eParts[2]);
+    
+    if (startDate > endDate) return showToast('종료 날짜가 시작 날짜보다 빠를 수 없습니다.');
+
+    const allEventsRaw = [];
+    const seenIds = new Set();
+    Object.values(events).flat().forEach(ev => {
+        if (!seenIds.has(ev.id)) { seenIds.add(ev.id); allEventsRaw.push(ev); }
+    });
+
+    const yoils = ['일', '월', '화', '수', '목', '금', '토'];
+    let resultText = '';
+    
+    const formatTextTime = (timeStr) => {
+        if (!timeStr) return '';
+        const [h, m] = timeStr.split(':').map(Number);
+        const ampm = h >= 12 ? '오후' : '오전';
+        const h12 = h % 12 || 12;
+        if (m === 0) return `${ampm} ${h12}시`;
+        return `${ampm} ${h12}시 ${m}분`;
+    };
+
+    const currDate = new Date(startDate);
+    while (currDate <= endDate) {
+        const pad = n => String(n).padStart(2, '0');
+        const mStr = pad(currDate.getMonth() + 1);
+        const dStr = pad(currDate.getDate());
+        const yoil = yoils[currDate.getDay()];
+        
+        const todaysEvents = allEventsRaw.filter(ev => {
+            const evStartStr = ev.startDate || ev.dateId;
+            const evEndStr = ev.endDate || ev.dateId;
+            const evS = evStartStr.split('-');
+            const start = new Date(evS[0], parseInt(evS[1]) - 1, evS[2]);
+            const evE = evEndStr.split('-');
+            const end = new Date(evE[0], parseInt(evE[1]) - 1, evE[2]);
+            return currDate >= start && currDate <= end;
+        });
+
+        todaysEvents.sort((a, b) => {
+            const aS = (a.startDate || a.dateId).split('-');
+            const startA = new Date(aS[0], parseInt(aS[1]) - 1, aS[2]).getTime(); 
+            const bS = (b.startDate || b.dateId).split('-');
+            const startB = new Date(bS[0], parseInt(bS[1]) - 1, bS[2]).getTime();
+            if (startA !== startB) return startA - startB;
+            return (a.order ?? 9999) - (b.order ?? 9999);
+        });
+
+        const isHubang = todaysEvents.length > 0 && todaysEvents.every(ev => ev.type === '휴방');
+        const validEvents = todaysEvents.filter(ev => ev.type !== '휴방');
+
+        if (isHubang) {
+            resultText += `- ${mStr}.${dStr} (${yoil})\n- 휴방\n\n`;
+        } else {
+            resultText += `- ${mStr}.${dStr} (${yoil})\n`;
+
+            if (validEvents.length === 0) {
+                resultText += `일정 미정\n\n`;
+            } else {
+                validEvents.forEach((ev, idx) => {
+                    const timeStr = formatTextTime(ev.time);
+                    
+                    if (timeStr) {
+                        resultText += `- ${ev.title} (${timeStr})\n`;
+                    } else {
+                        resultText += `- ${ev.title}\n`;
+                    }
+                });
+                resultText += `\n`;
+            }
+        }
+        
+        resultText = resultText.replace(/\n\n$/, '\n') + '\u200B\n\n';
+        currDate.setDate(currDate.getDate() + 1);
+    }
+
+    resultText = resultText.replace(/[\u200B\n\s]+$/, '');
+    
+    document.getElementById('scheduleTextPreview').value = resultText;
+    document.getElementById('textCopyStep1').style.display = 'none';
+    document.getElementById('textCopyStep2').style.display = 'flex';
+};
+
+window.copyScheduleText = function() {
+    const text = document.getElementById('scheduleTextPreview').value;
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('일정이 클립보드에 복사되었습니다.');
+        closeModal('textCopyModal');
+    }).catch(err => {
+        showToast('복사에 실패했습니다.');
+        console.error(err);
+    });
+};
+
 Object.assign(window, {
     handleEventImgUpload, addMember, deleteMember,deletePopupImage,
     handlePopupImgUpload: window.handlePopupImgUpload,
@@ -2600,7 +2769,8 @@ Object.assign(window, {
     updateSongbookAdminUI, toggleFavorite, toggleModalFavorite,
     toggleMobileMenu, handleMobileTab, toggleMobileMemo,
     closeUpPopup, checkAndShowPopup, removeEventImage,
-    openDayManager, renderDayManagerList, moveDayManagerItem, removeDayManagerItem, addDayManagerItem, uploadDayManagerImg, saveDayManager, deleteAllDayManagerItems
+    openDayManager, renderDayManagerList, moveDayManagerItem, removeDayManagerItem, addDayManagerItem, uploadDayManagerImg, saveDayManager, deleteAllDayManagerItems,
+    openTextCopyModal
 });
 
 document.addEventListener('contextmenu', function(e) {

@@ -179,12 +179,15 @@ body {
 }
 #monthDisplay:hover { color: var(--point-pink); }
 
-.memo-btn {
+.memo-btn, .copy-btn {
     border-radius: 999px; /* 완전한 알약 모양 */
     padding: 12px 24px; font-size: 17px;
+    display: flex; align-items: center; justify-content: center; border: none !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); background-color: #ffffff; color: var(--text-dark);
+    transition: all 0.2s ease; cursor: pointer; font-weight: 800; font-family: inherit;
 }
-.memo-btn svg { width: 24px !important; height: 24px !important; margin-right: 8px; }
-.memo-btn:hover { background-color: #ffffff !important; color: var(--point-pink) !important; border-color: var(--point-pink) !important; transform: translateY(-2px); }
+.memo-btn svg, .copy-btn svg { width: 24px !important; height: 24px !important; margin-right: 8px; }
+.memo-btn:hover, .memo-btn.board-active, .copy-btn:hover { background-color: #ffffff !important; color: var(--point-pink) !important; border-color: var(--point-pink) !important; transform: translateY(-2px); }
 .memo-btn.board-active { background-color: #ffffff !important; color: var(--point-pink) !important; border-color: transparent !important; }
 
 .calendar-body { display: flex; align-items: stretch; gap: 24px; width: 100%; }
@@ -744,6 +747,7 @@ body {
     .calendar-header-top { flex-direction: column; align-items: center; width: 100%; }
     .calendar-header-title { width: 100%; justify-content: center; }
     .memo-btn { position: static; margin-top: 12px; }
+    .mobile-copy-wrap { position: static !important; margin-bottom: 10px; align-self: center; justify-content: center; }
     .calendar-header h2 { font-size: 1.25rem !important; line-height: 1.75rem !important; text-align: center; min-width: 170px !important; }
     .calendar-grid { grid-template-columns: 1fr; gap: 14px; }
     
@@ -936,4 +940,8 @@ body {
 
 .admin-only-btn.is-admin-visible { 
     display: flex !important; 
+}
+
+#scheduleTextPreview {
+    border-radius: 30px !important;
 }

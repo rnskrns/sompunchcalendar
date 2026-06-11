@@ -1353,7 +1353,10 @@ function renderCalendar() {
                             item.className = 'summary-item'; 
                             item.style.cssText = `background-color: ${bgColor}; color: ${textColor}; padding: 14px 18px; margin-bottom: 12px; border-radius: 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 800;`;
                             
-                            item.onclick = () => showInfoByEvent(ev);
+                            item.onclick = (e) => {
+                                e.stopPropagation();
+                                showDayInfo(dateId, todaysEvents);
+                            };
                             
                             // 제목은 왼쪽, 시간은 오른쪽에 깔끔하게 배치
                             item.innerHTML = `<span style="flex: 1; text-align: left;">${ev.title}</span>${ev.time ? `<span style="font-size: 12px; opacity: 0.8; margin-left: 10px; white-space: nowrap;">${formatTime12h(ev.time)}</span>` : ''}`;

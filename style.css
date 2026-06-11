@@ -158,7 +158,6 @@ body {
     word-break: break-word; padding: 12px; border-radius: 24px; /* 12px -> 24px */
     cursor: pointer; transition: background-color 0.2s ease;
 }
-.summary-item:hover { background-color: #F9F9F9; }
 .summary-title { flex: 1; font-weight: 700; color: var(--text-dark); }
 .summary-time { font-size: 12px; color: #7a7a7a; white-space: nowrap; }
 
@@ -712,10 +711,17 @@ body {
     .header-center { width: 100%; padding: 0; }
     .header-left, .header-right { padding: 0; width: 100%; justify-content: center; }
     .today-summary { width: 100%; max-width: 100%; }
+    .week-events .summary-item {
+        margin-bottom: 3px !important; /* 기존 12px -> 6px 등 원하는 수치로 조절 */
+    }
     
+    /* 깔끔한 정렬을 위해 마지막 카드의 하단 여백 제거 */
+    .week-events .summary-item:last-child {
+        margin-bottom: 0 !important;
+    }
     .week-row {
         background-color: #FFFFFF !important; /* 전체 배경 흰색 */
-        border-radius: 30px !important; /* 둥근 카드 모양 */
+        border-radius: 999px !important; /* 둥근 카드 모양 */
         border: 2px solid var(--point-pink) !important; /* 테두리 연한 핑크 */
         box-shadow: 4px 4px 0px var(--point-pink) !important; /* 그림자 연한 핑크 */
     }
@@ -735,7 +741,7 @@ body {
         color: #FFFFFF !important; /* 글씨는 깔끔하게 하얀색 */
     }
     .week-row.today-row .week-day-name { color: #FFFFFF !important; }
-    .week-row.today-row .event-tag { border: none !important; background-color: transparent; }
+    .week-row.today-row .event-tag { border: none !important; background-color: transparent; overflow: hidden !important; max-width: 100% !important; }
     
     .day.today .week-day-num, .day.today .week-day-name { color: #CA8A04 !important; }
     .fixed-top-bar { padding: 0 16px; justify-content: flex-end; }
@@ -755,7 +761,7 @@ body {
     .day-label { font-family: 'RomanticGumi', sans-serif !important; font-weight: normal; font-size: 16px; color: #C0B7A9; padding-bottom: 15px; display: flex; justify-content: center; align-items: center; text-align: center; }
     .day-num { font-family: 'RomanticGumi', sans-serif !important; }
     .day { min-height: 160px; }
-    .event-tag { font-size: 14px; min-height: 50px; }
+    .event-tag { font-size: 14px; min-height: 50px; overflow: hidden !important; max-width: 100% !important; }
     .main-logo { height: 70px; }
     .calendar-body { display: flex; align-items: flex-start; gap: 16px; width: 100%; flex-direction: column; }
     .calendar-main { background-color: transparent !important; box-shadow: none !important; border: none !important; }    
@@ -945,4 +951,53 @@ body {
 
 #scheduleTextPreview {
     border-radius: 30px !important;
+}
+
+/* =========================================
+   통합일정상세 팝업창 모바일(스마트폰) 사이즈 최적화 (강력버전)
+   ========================================= */
+@media screen and (max-width: 1050px) {
+    #dayInfoModal .event-modal-box {
+        width: 95% !important;
+        min-width: 320px !important;
+    }
+    
+    #dayInfoModal #dayInfoList > div {
+        max-width: 100% !important;
+        min-width: auto !important;
+    }
+    
+    #dayInfoModal #dayInfoList h2 {
+        font-size: 22px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    #dayInfoModal #dayInfoList .info-time {
+        font-size: 13px !important;
+        padding: 8px 16px !important;
+    }
+    
+    #dayInfoModal #dayInfoList .info-profiles {
+        gap: 12px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    #dayInfoModal #dayInfoList .profile-card {
+        width: 60px !important;
+        gap: 6px !important;
+    }
+    
+    #dayInfoModal #dayInfoList .profile-img {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    #dayInfoModal #dayInfoList .profile-name {
+        font-size: 12px !important;
+    }
+    
+    #dayInfoModal #dayInfoNoticeArea {
+        max-width: 100% !important;
+        margin-top: 15px !important;
+    }
 }

@@ -24,6 +24,26 @@ let dayManagerItems = [];
 let dayManagerActiveDateId = '';
 let dayManagerFormattedDateId = '';
 
+async function seedAdmin() {
+    try {
+        const q = query(collection(db, "admins"));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) {
+            console.log("관리자 정보가 없어 기본 계정을 생성합니다.");
+            const defaultAdmin = {
+                id: 'ldrboo',
+                pw: 'som11110915',
+                name: '솜주먹',
+                img: 'https://stimg.sooplive.com/LOGO/ld/ldrboo/ldrboo.jpg'
+            };
+            await addDoc(collection(db, "admins"), defaultAdmin);
+            console.log("기본 관리자 계정 생성 완료.");
+        }
+    } catch (e) {
+        console.error("관리자 정보 초기화 오류:", e);
+    }
+}
+
 /* 하이브리드 로그인 로직 시작 */
 function getAdminProfiles() {
     try { return JSON.parse(localStorage.getItem('sompunch_admin_profiles')) || []; }
@@ -58,52 +78,80 @@ function initAuth() {
     updateAdminUI();
 }
 
-window.loginAdmin = function() {
+window.loginAdmin = async function() {
     const id = document.getElementById('adminId').value.trim();
     const pw = document.getElementById('adminPw').value;
     const err = document.getElementById('pwError');
     
-    // 수정된 부분: stayLoggedIn 체크박스가 HTML에 없어도 에러가 발생하지 않도록 안전하게 처리
     const stayLoggedInElement = document.getElementById('stayLoggedIn');
     const stayLoggedIn = stayLoggedInElement ? stayLoggedInElement.checked : false;
 
-    if (id === 'ldrboo' && pw === 'som11110915') {
-        if (err) err.classList.add('hidden');
-        
-        const token = btoa(id + '_' + Date.now() + '_secret'); 
-        const newProfile = {
-            id: id,
-            name: '솜주먹',
-            img: 'https://stimg.sooplive.com/LOGO/ld/ldrboo/ldrboo.jpg',
-            token: token
-        };
-        
-        let profiles = getAdminProfiles();
-        const existingIdx = profiles.findIndex(p => p.id === id);
-        if (existingIdx >= 0) profiles[existingIdx] = newProfile;
-        else profiles.push(newProfile);
-        
-        saveAdminProfiles(profiles);
-        
-        if (stayLoggedIn) {
-            localStorage.setItem('sompunch_admin_session', newProfile.token);
-        } else {
-            sessionStorage.setItem('sompunch_admin_session', newProfile.token);
-        }
-        
-        isAdmin = true;
-        currentAdminProfile = newProfile;
-        updateAdminUI();
-        renderCalendar();
-        
-        document.getElementById('adminId').value = '';
-        document.getElementById('adminPw').value = '';
-        closeModal('pwModal');
-        showToast(`${newProfile.name}님 환영합니다.`);
-    } else {
-        // 로그인 실패 시 요청하신 안내 문구 출력
+    if (!id || !pw) {
         if (err) {
-            err.innerText = '등록되지 않은 아이디 입니다';
+            err.innerText = '아이디와 비밀번호를 모두 입력해주세요.';
+            err.classList.remove('hidden');
+        }
+        return;
+    }
+
+    try {
+        const q = query(collection(db, "admins"), where("id", "==", id));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const adminDoc = querySnapshot.docs[0];
+            const adminData = adminDoc.data();
+
+            if (adminData.pw === pw) {
+                if (err) err.classList.add('hidden');
+        
+                const token = btoa(id + '_' + Date.now() + '_secret'); 
+                const newProfile = {
+                    id: id,
+                    docId: adminDoc.id,
+                    name: adminData.name || '솜주먹',
+                    img: adminData.img || 'https://stimg.sooplive.com/LOGO/ld/ldrboo/ldrboo.jpg',
+                    token: token
+                };
+                
+                let profiles = getAdminProfiles();
+                const existingIdx = profiles.findIndex(p => p.id === id);
+                if (existingIdx >= 0) profiles[existingIdx] = newProfile;
+                else profiles.push(newProfile);
+                
+                saveAdminProfiles(profiles);
+                
+                if (stayLoggedIn) {
+                    localStorage.setItem('sompunch_admin_session', newProfile.token);
+                } else {
+                    sessionStorage.setItem('sompunch_admin_session', newProfile.token);
+                }
+                
+                isAdmin = true;
+                currentAdminProfile = newProfile;
+                updateAdminUI();
+                renderCalendar();
+                
+                document.getElementById('adminId').value = '';
+                document.getElementById('adminPw').value = '';
+                closeModal('pwModal');
+                showToast(`${newProfile.name}님 환영합니다.`);
+            } else {
+                if (err) {
+                    err.innerText = '비밀번호가 일치하지 않습니다.';
+                    err.classList.remove('hidden');
+                }
+            }
+        } else {
+            if (err) {
+                err.innerText = '등록되지 않은 아이디 입니다';
+                err.classList.remove('hidden');
+            }
+        }
+    } catch (e) {
+        console.error("Login error:", e);
+        if (err) {
+            err.innerText = '로그인 중 오류가 발생했습니다.';
             err.classList.remove('hidden');
         }
     }
@@ -1547,63 +1595,27 @@ window.toggleUpBoard = function() {
     const memoPanel = document.getElementById('memoPanel');
     const upPanel = document.getElementById('upPanel');
     
-    // 메모 패널이 켜져 있다면 끄기
-    if (memoPanel) {
-        memoPanel.style.display = ''; 
-        memoPanel.classList.remove('open', 'show-sheet');
-    }
-    
-    // 업 보드 토글
-    if (upPanel) {
-        upPanel.style.display = ''; 
-        upPanel.classList.toggle('open');
-        
-        if (upPanel.classList.contains('open')) {
-            loadUpItems();
-        }
-    }
-    updateBoardButtonsState();
-};
-
-window.toggleUpBoard = function() {
-    const memoPanel = document.getElementById('memoPanel');
-    const upPanel = document.getElementById('upPanel');
-    
-    // 메모 패널은 무조건 닫기
+    // 메모 패널이 열려 있다면 확실하게 닫기
     if (memoPanel) {
         memoPanel.style.display = 'none';
         memoPanel.classList.remove('open', 'show-sheet');
     }
     
-    // 업 보드 토글
+    // 업 보드 토글 로직 (PC 및 모바일 호환)
     if (upPanel) {
         const isHidden = upPanel.style.display === 'none' || upPanel.style.display === '';
-        upPanel.style.display = isHidden ? 'flex' : 'none';
         
         if (isHidden) {
+            upPanel.style.display = 'flex'; // UI 구조에 따라 'block'이 필요할 수도 있습니다.
             upPanel.classList.add('open');
+            // 모바일 해상도일 경우 sheet 형태 적용
+            if (window.innerWidth < 1050) {
+                upPanel.classList.add('show-sheet');
+            }
             loadUpItems();
         } else {
+            upPanel.style.display = 'none';
             upPanel.classList.remove('open', 'show-sheet');
-        }
-    }
-    updateBoardButtonsState();
-};
-
-window.toggleUpBoard = function() {
-    const memoPanel = document.getElementById('memoPanel');
-    const upPanel = document.getElementById('upPanel');
-    
-    // 메모 패널이 켜져 있다면 끔
-    if (memoPanel) memoPanel.classList.remove('open', 'show-sheet');
-    
-    // 업 보드 토글
-    if (upPanel) {
-        upPanel.classList.toggle('open');
-        if (window.innerWidth < 1050) upPanel.classList.toggle('show-sheet');
-        
-        if (upPanel.classList.contains('open') || upPanel.classList.contains('show-sheet')) {
-            loadUpItems();
         }
     }
     updateBoardButtonsState();
@@ -1924,38 +1936,48 @@ window.changeAdminPassword = async function() {
     const confirmPwInput = document.getElementById('confirmPwInput').value;
     const err = document.getElementById('pwChangeError');
 
-    let currentPw = 'som11110915';
+    if (!isAdmin || !currentAdminProfile || !currentAdminProfile.docId) {
+        if (err) { err.innerText = '로그인 정보가 없습니다.'; err.classList.remove('hidden'); }
+        return;
+    }
+
     try {
-        const snap = await getDoc(doc(db, 'settings', 'admin_pw'));
-        if (snap.exists() && snap.data().pw) {
-            currentPw = snap.data().pw;
+        const adminDocRef = doc(db, 'admins', currentAdminProfile.docId);
+        const adminDocSnap = await getDoc(adminDocRef);
+
+        if (!adminDocSnap.exists()) {
+            if (err) { err.innerText = '관리자 정보를 찾을 수 없습니다.'; err.classList.remove('hidden'); }
+            return;
         }
-    } catch(e) {}
 
-    if (currentPwInput !== currentPw) {
-        if (err) { err.innerText = '현재 비밀번호가 일치하지 않습니다.'; err.classList.remove('hidden'); }
-        return;
-    }
-    if (!newPwInput) {
-        if (err) { err.innerText = '새 비밀번호를 입력해주세요.'; err.classList.remove('hidden'); }
-        return;
-    }
-    if (newPwInput !== confirmPwInput) {
-        if (err) { err.innerText = '새 비밀번호와 확인이 일치하지 않습니다.'; err.classList.remove('hidden'); }
-        return;
-    }
+        const adminData = adminDocSnap.data();
 
-    try {
+        if (currentPwInput !== adminData.pw) {
+            if (err) { err.innerText = '현재 비밀번호가 일치하지 않습니다.'; err.classList.remove('hidden'); }
+            return;
+        }
+        if (!newPwInput) {
+            if (err) { err.innerText = '새 비밀번호를 입력해주세요.'; err.classList.remove('hidden'); }
+            return;
+        }
+        if (newPwInput !== confirmPwInput) {
+            if (err) { err.innerText = '새 비밀번호와 확인이 일치하지 않습니다.'; err.classList.remove('hidden'); }
+            return;
+        }
+
         const btn = document.querySelector('#pwChangeModal .btn-save');
         if(btn) btn.innerText = '저장 중...';
-        await setDoc(doc(db, 'settings', 'admin_pw'), { pw: newPwInput });
+        await updateDoc(adminDocRef, { pw: newPwInput });
         
         isAdmin = false;
+        
+        let profiles = getAdminProfiles();
+        profiles = profiles.filter(p => p.id !== currentAdminProfile.id);
+        saveAdminProfiles(profiles);
+
         currentAdminProfile = null;
         sessionStorage.removeItem('sompunch_admin_session'); 
         localStorage.removeItem('sompunch_admin_session');
-        
-        saveAdminProfiles([]);
         
         updateAdminUI(); 
         renderCalendar(); 
@@ -1964,7 +1986,8 @@ window.changeAdminPassword = async function() {
         closeModal('pwChangeModal');
         if(btn) btn.innerText = '변경';
     } catch(e) {
-        if (err) { err.innerText = '비밀번호 변경 중 오류가 발생했습니다.'; err.classList.remove('hidden'); }
+        console.error("Password change error:", e);
+        if (err) { err.innerText = '현재 비밀번호가 일치하지 않습니다.'; err.classList.remove('hidden'); }
     }
 };
 
@@ -2600,6 +2623,7 @@ document.addEventListener('dragstart', function(e) {
 
 window.onload = async () => {
     try {
+        await seedAdmin();
         await loadData();
         initAuth(); // 여기서 로그인 상태를 파악함
         updateAdminUI(); // <--- 이 코드가 있는지 확인하세요! 반드시 있어야 합니다.

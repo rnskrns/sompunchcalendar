@@ -711,7 +711,7 @@ body {
     
     .week-row {
         background-color: #FFFFFF !important; /* 전체 배경 흰색 */
-        border-radius: 999px !important; /* 완전한 알약 모양 */
+        border-radius: 30px !important; /* 둥근 카드 모양 */
         border: 2px solid var(--point-pink) !important; /* 테두리 연한 핑크 */
         box-shadow: 4px 4px 0px var(--point-pink) !important; /* 그림자 연한 핑크 */
     }

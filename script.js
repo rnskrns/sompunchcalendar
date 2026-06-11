@@ -936,11 +936,6 @@ window.openDayManager = function(dateIdStr, targetEventId = null) {
     ensureDayManagerModal();
     dayManagerActiveDateId = dateIdStr;
     
-    const targetEv = dayManagerItems.find(item => item.noticeLink || item.noticeTitle || item.noticeDesc);
-    document.getElementById('dayManagerNoticeInput').value = targetEv?.noticeLink || '';
-    document.getElementById('dayManagerNoticeTitle').value = targetEv?.noticeTitle || '';
-    document.getElementById('dayManagerNoticeDesc').value = targetEv?.noticeDesc || '';
-
     document.getElementById('dayManagerModal').style.display = 'flex';
     
     const parts = dateIdStr.split('-');
@@ -963,6 +958,11 @@ window.openDayManager = function(dateIdStr, targetEventId = null) {
         return targetDate >= start && targetDate <= end;
     });
     
+    const targetEv = dayEvents.find(item => item.noticeLink || item.noticeTitle || item.noticeDesc);
+    document.getElementById('dayManagerNoticeInput').value = targetEv?.noticeLink || '';
+    document.getElementById('dayManagerNoticeTitle').value = targetEv?.noticeTitle || '';
+    document.getElementById('dayManagerNoticeDesc').value = targetEv?.noticeDesc || '';
+
     dayManagerItems = dayEvents.map((ev, idx) => {
         const timeData = parseTimeStr(ev.time);
         return {

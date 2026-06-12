@@ -209,7 +209,7 @@ window.renderAdminProfiles = function() {
                 <div style="position:relative; width: 50px; height: 50px; border-radius: 50%;" 
                      onmouseenter="this.querySelector('.profile-delete-btn').style.display='flex'" 
                      onmouseleave="this.querySelector('.profile-delete-btn').style.display='none'">
-                    <img src="${p.img}" alt="${p.name}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #fdb6ff;">
+                    <img src="${p.img}" alt="${p.name}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #F5BDD6;">
                     <button class="profile-delete-btn" onclick="deleteAdminProfile(event, '${p.id}')" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; display:none; align-items:center; justify-content:center; padding:0;">✕</button>
                 </div>
                 <span class="profile-item-name" style="font-size:13px; font-weight:bold; color:#7A5A2F; margin-top: 6px;">${p.name}</span>
@@ -890,10 +890,9 @@ async function deleteEvent() {
 
 function ensureDayManagerModal() {
     if (document.getElementById('dayManagerModal')) return;
-    const html = `
+const html = `
         <div id="dayManagerModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center; backdrop-filter:blur(2px);">
-            <div class="event-modal-box mgr-modal-box" style="display:flex; flex-direction:column; padding:32px 40px; max-height:90vh; width:95%; max-width:1200px; background:#fff; border-radius:16px; box-sizing:border-box;">            <h2 id="dayManagerTitle" style="margin-top:0; margin-bottom:24px; font-family:'RomanticGumi', sans-serif; color:#7A5A2F; font-size:38px; font-weight:bold; text-align:center; letter-spacing:1px; flex-shrink:0;">일정 관리</h2>
-            
+            <div class="event-modal-box mgr-modal-box" style="display:flex; flex-direction:column; padding:32px 40px; max-height:90vh; width:95%; max-width:1200px; background:#fff; border-radius:16px; box-sizing:border-box;">            <h2 id="dayManagerTitle" style="margin-top:0; margin-bottom:24px; font-family:'RomanticGumi', sans-serif; color:#7A5A2F; font-size:38px; font-weight:normal; text-align:center; letter-spacing:1px; flex-shrink:0;">일정 관리</h2>            
             <div id="dayManagerList" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:16px; padding-right:8px; min-height:300px;"></div>
             
             <div id="noticeDetailArea" style="display:none; margin: 15px 0; padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
@@ -910,7 +909,7 @@ function ensureDayManagerModal() {
                     <button id="toggleNoticeBtn" onclick="toggleNoticeDetail()" style="display:none;">공지 상세 ▼</button>
                     <input type="text" id="dayManagerNoticeInput" placeholder="공지 링크 (선택)" style="display:none;">
                     <button onclick="closeModal('dayManagerModal')" style="padding:12px 24px; background:#f1f5f9; color:#64748b; border:none; border-radius:999px; cursor:pointer; font-weight:800;">닫기</button>
-                    <button onclick="saveDayManager()" style="padding:12px 24px; background:#fdb6ff; color:#7A5A2F; border:none; border-radius:999px; cursor:pointer; font-weight:800;">저장</button>
+                    <button onclick="saveDayManager()" style="padding:12px 24px; background:#F5BDD6; color:#ffffff; border:none; border-radius:999px; cursor:pointer; font-weight:800;">저장</button>
                 </div>
             </div>
         </div>
@@ -1010,7 +1009,7 @@ window.renderDayManagerList = function() {
     style.innerHTML = `
         .event-custom-input { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #ddd; border-radius: 8px; color: #7A5A2F; font-weight: bold; }
         .mgr-ampm-btn { padding: 8px 12px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 8px; font-weight: bold; color: #7A5A2F; flex-shrink: 0; }
-        .mgr-ampm-btn.active { background: #fdb6ff; border-color: #fdb6ff; color: #7A5A2F; }
+        .mgr-ampm-btn.active { background: #F5BDD6; border-color: #F5BDD6; color: #ffffff; }
         .mgr-time-row { display: flex; gap: 6px; align-items: center; }
         .mgr-date-row { display: flex; gap: 10px; }
 
@@ -1339,7 +1338,7 @@ function renderCalendar() {
                                 bgColor = '#FFE4E8'; // 연한 분홍 배경
                                 textColor = '#D81B60'; // 진한 분홍 글씨
                             } else if (ev.type === '합방') {
-                                bgColor = '#FDF0D5'; // 베이지 배경
+                                bgColor = '#f7f3ee'; // 베이지 배경
                                 textColor = '#D81B60'; // 진한 분홍 글씨
                             } else if (ev.type === '시네티') {
                                 bgColor = '#DCEDC8';
@@ -1557,7 +1556,10 @@ function updateSummary() {
             
             // 기존 'summary-item' 클래스에 'type-개인방송' 등의 클래스를 함께 달아줍니다.
             item.className = `summary-item type-${typeClass}`; 
-            item.onclick = () => showInfoByEvent(ev);
+            
+            // 날짜 ID를 만들고 통합 일정 팝업창(showDayInfo)을 호출하도록 변경합니다.
+            const targetDateId = `${todayLocal.getFullYear()}-${todayLocal.getMonth() + 1}-${todayLocal.getDate()}`;
+            item.onclick = () => showDayInfo(targetDateId, todaysEvents);
             
             // 기존의 동그란 점(summary-dot)을 빼고 제목과 시간만 넣습니다.
             item.innerHTML = `<span style="flex: 1; text-align: left; font-weight: 800;">${ev.title}</span>${ev.time ? `<span style="font-size: 12px; font-weight: 800; opacity: 0.8; white-space: nowrap;">${formatTime12h(ev.time)}</span>` : ''}`;
@@ -2615,7 +2617,7 @@ window.openTextCopyModal = function() {
                     </div>
                     <div style="display:flex; gap:10px; margin-top:10px;">
                         <button onclick="closeModal('textCopyModal')" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#f1f5f9; color:#64748b; font-weight:bold; font-size:15px;">취소</button>
-                        <button onclick="generateScheduleText()" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#fdb6ff; color:#7A5A2F; font-weight:bold; font-size:15px;">확인</button>
+                        <button onclick="generateScheduleText()" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#F5BDD6; color:#ffffff; font-weight:bold; font-size:15px;">확인</button>
                     </div>
                 </div>
 
@@ -2627,7 +2629,7 @@ window.openTextCopyModal = function() {
                     </div>
                     <div style="display:flex; gap:10px; margin-top:10px;">
                         <button onclick="window.resetTextCopyModal()" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#f1f5f9; color:#64748b; font-weight:bold; font-size:15px;">다시 선택</button>
-                        <button onclick="copyScheduleText()" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#fdb6ff; color:#7A5A2F; font-weight:bold; font-size:15px;">복사하기</button>
+                        <button onclick="copyScheduleText()" style="flex:1; padding:12px; border:none; border-radius:999px; cursor:pointer; background:#F5BDD6; color:#ffffff; font-weight:bold; font-size:15px;">복사하기</button>
                     </div>
                 </div>
             </div>

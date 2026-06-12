@@ -533,13 +533,11 @@ body {
 .member-list-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: #F9F9F9; border-radius: 20px; margin-bottom: 10px; }
 .member-img-preview { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #EEE; }
 
-#infoModal .profile-list { display: grid; grid-template-columns: repeat(6, auto); gap: 15px; margin-top: 20px; justify-content: center; }
-#infoModal .profile-card { display: flex; flex-direction: column; align-items: center; width: 80px; gap: 8px; }
+#infoModal .profile-list { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; justify-content: center; align-items: center; }#infoModal .profile-card { display: flex; flex-direction: column; align-items: center; width: 80px; gap: 8px; }
 #infoModal .profile-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--point-pink); background: #F0F0F0; }
 #infoModal .profile-name { font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
 .profile-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--point-pink); background: #F0F0F0; }
 .profile-name { font-size: 11px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
-
 .admin-only-btn { display: none !important; }
 .admin-only-btn.admin-visible { display: flex !important; }
 .admin-active svg { fill: var(--admin-color) !important; }

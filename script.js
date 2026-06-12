@@ -1081,8 +1081,7 @@ window.renderDayManagerList = function() {
             
             body.innerHTML = `
                 <div class="mgr-col" style="flex:1; min-width:300px; display:flex; flex-direction:column; gap:12px;">
-                    <div><label style="display:block; font-weight:800; color:#7A5A2F; font-size:14px; margin-bottom:4px;">일정 제목 *</label><input type="text" class="event-custom-input mgr-title" value="${item.title || ''}"></div>
-                    <div>
+                    <div><label style="display:block; font-weight:800; color:#7A5A2F; font-size:14px; margin-bottom:4px;">일정 제목 *</label><textarea class="event-custom-input mgr-title" style="resize:vertical; min-height: 60px;">${item.title || ''}</textarea></div>                    <div>
                         <label style="display:block; font-weight:800; color:#7A5A2F; font-size:14px; margin-bottom:4px;">시간</label>
                         <div class="mgr-time-row">
                             <button class="mgr-ampm-btn ${item.ampm === '오전' ? 'active' : ''}" onclick="setMgrAmPm(this, '오전')">오전</button>

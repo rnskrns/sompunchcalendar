@@ -471,7 +471,7 @@ body {
 .event-tag:hover { transform: scale(0.97); }
 .event-time-badge { position: absolute; top: 12px; left: 15px; display: inline-block; border: 1.5px solid #FFFFFF; background-color: #FFFFFF; border-radius: 16px; padding: 3px 7px; font-size: 10px; font-weight: 800; line-height: 1; color: inherit; font-family: inherit !important; }
 .event-tag div {
-    text-align: left !important;
+    text-align: center !important;
     flex: 1 !important;
     margin-right: 5px !important;
     font-size: 15px !important;

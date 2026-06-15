@@ -2845,37 +2845,51 @@ const loadingGifs = [
     "https://i.postimg.cc/9083sFyz/somload-(4).webp",
 ];
 
-const randomLoadingImg = document.getElementById('randomLoadingImg');
-if (randomLoadingImg) {
-    randomLoadingImg.style.opacity = '0';
-    randomLoadingImg.style.transition = 'opacity 0.3s ease'; 
-
+(async function() {
     const randomGif = loadingGifs[Math.floor(Math.random() * loadingGifs.length)];
-    let imageLoaded = false;
+    const randomLoadingImg = document.getElementById('randomLoadingImg');
     
-    randomLoadingImg.onload = () => {
-        if (!imageLoaded) {
-            imageLoaded = true;
-            randomLoadingImg.style.opacity = '1';
-        }
-    };
+    if (!randomLoadingImg) return;
 
-    randomLoadingImg.onerror = () => {
-        if (!imageLoaded) {
-            imageLoaded = true;
-            randomLoadingImg.style.opacity = '1';
-            randomLoadingImg.alt = "이미지를 불러오지 못했습니다 🥲";
-        }
-    };
+    let imageLoaded = false;
 
-    // 타임아웃: 3초 후에도 이미지가 로드되지 않으면 계속 진행
-    setTimeout(() => {
+    // 1. 3초 타임아웃 설정
+    const timeout = setTimeout(() => {
         if (!imageLoaded) {
             imageLoaded = true;
             randomLoadingImg.style.opacity = '1';
-            randomLoadingImg.alt = "이미지 로딩 중...";
+            console.log("타임아웃: 이미지를 즉시 표시합니다.");
         }
     }, 3000);
 
-    randomLoadingImg.src = randomGif;
-}
+    // 2. 이미지 로딩 시도
+    try {
+        const cache = await caches.open('sompunch-loading-images');
+        const cachedResponse = await cache.match(randomGif);
+
+        if (cachedResponse) {
+            const blob = await cachedResponse.blob();
+            randomLoadingImg.src = URL.createObjectURL(blob);
+        } else {
+            const response = await fetch(randomGif);
+            if (response.ok) {
+                cache.put(randomGif, response.clone());
+                const blob = await response.blob();
+                randomLoadingImg.src = URL.createObjectURL(blob);
+            } else {
+                randomLoadingImg.src = randomGif;
+            }
+        }
+    } catch (error) {
+        randomLoadingImg.src = randomGif;
+    }
+
+    // 3. 이미지가 실제로 로드 완료되었을 때의 처리
+    randomLoadingImg.onload = () => {
+        if (!imageLoaded) {
+            clearTimeout(timeout); // 로드 성공했으니 타임아웃 취소
+            imageLoaded = true;
+            randomLoadingImg.style.opacity = '1';
+        }
+    };
+})();

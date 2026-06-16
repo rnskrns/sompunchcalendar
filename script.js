@@ -1765,7 +1765,34 @@ window.loadUpItems = async function() {
 window.deleteUpItem = async function(id) {
     if (!isAdmin) return;
     if(confirm('이 항목을 삭제하시겠습니까?')) {
-        try { await deleteDoc(doc(db, "up", id)); showToast('항목이 삭제되었습니다.'); await loadUpItems(); }
+        try {
+            await deleteDoc(doc(db, "up", id));
+            showToast('항목이 삭제되었습니다.');
+
+            // 삭제 후 남은 유효한 업링크가 있는지 확인
+            const snapshot = await getDocs(collection(db, 'up'));
+            let validCount = 0;
+            const todayLocal = new Date();
+            const todayStr = `${todayLocal.getFullYear()}-${String(todayLocal.getMonth() + 1).padStart(2, '0')}-${String(todayLocal.getDate()).padStart(2, '0')}`;
+
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                if (!data.deadline || data.deadline >= todayStr) validCount++;
+            });
+
+            // 남은 업링크가 없으면 팝업 이미지도 자동 삭제
+            if (validCount === 0) {
+                try {
+                    await deleteDoc(doc(db, 'settings', 'popup'));
+                    const popupInput = document.getElementById('popupImageUrlInput');
+                    if (popupInput) popupInput.value = ''; // 설정 모달의 입력칸도 초기화
+                } catch(e) {
+                    console.error('팝업 이미지 자동 삭제 실패:', e);
+                }
+            }
+
+            await loadUpItems();
+        }
         catch (error) { console.error('삭제 실패:', error); showToast('삭제에 실패했습니다.'); }
     }
 };
@@ -1806,6 +1833,14 @@ window.checkAndShowPopup = async function() {
             if (data.deadline && data.deadline < todayStr) return;
             validItems.push({ id: docSnap.id, ...data });
         });
+
+        // ★ 업링크가 하나도 없다면 팝업 이미지를 자동 삭제하고 팝업 띄우기 종료
+        if (validItems.length === 0) {
+            if (popupImageUrl) {
+                try { await deleteDoc(doc(db, 'settings', 'popup')); } catch(e) {}
+            }
+            return;
+        }
 
         if (!popupImageUrl && validItems.length === 0) return;
 

@@ -2875,7 +2875,7 @@ window.addEventListener('error', () => {
 
 const loadingGifs = [
     "https://i.postimg.cc/wMfKnTD7/somload-(1).webp",
-    "https://i.postimg.cc/C5Py9LbB/somload-(2).webp",
+    "https://res.cloudinary.com/dtlqzklk5/image/upload/v1781851578/bc15ayrkqyq18wdw5a4s.webp",
     "https://i.postimg.cc/x8xrBTLN/somload-(3).webp",
     "https://i.postimg.cc/9083sFyz/somload-(4).webp",
 ];

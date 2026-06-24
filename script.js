@@ -1896,6 +1896,11 @@ window.showAdminMenu = function(e) {
         btnManage.onmouseover = () => btnManage.style.background = '#f1f5f9'; btnManage.onmouseout = () => btnManage.style.background = 'none';
         btnManage.onclick = () => { menu.style.display = 'none'; window.openAdminSettings(); };
         
+        const btnMember = document.createElement('button');
+        btnMember.innerText = '멤버 관리';
+        btnMember.style.cssText = 'padding:10px 16px; border:none; background:none; text-align:left; cursor:pointer; font-weight:bold; border-radius:30px; font-size:14px; font-family: "TMoneyDungunbaram";';
+        btnMember.onclick = () => { menu.style.display = 'none'; window.openMemberManager(); };
+
         const btnChangePw = document.createElement('button');
         btnChangePw.innerText = '암호 변경';
         btnChangePw.style.cssText = 'padding:10px 16px; border:none; background:none; text-align:left; cursor:pointer; font-weight:bold; border-radius:8px; font-size:14px; font-family: "AliceDigitalLearning";';
@@ -1922,7 +1927,7 @@ window.showAdminMenu = function(e) {
             renderCalendar(); 
             showToast('로그아웃 되었습니다.');
         };
-        menu.appendChild(btnManage); menu.appendChild(btnChangePw); menu.appendChild(btnLogout); document.body.appendChild(menu);
+        menu.appendChild(btnMember); menu.appendChild(btnManage); menu.appendChild(btnChangePw); menu.appendChild(btnLogout); document.body.appendChild(menu); 
     }
     
     menu.style.top = (rect.bottom + 8) + 'px';

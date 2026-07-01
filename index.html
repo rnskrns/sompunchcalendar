@@ -298,7 +298,7 @@
                     </div>
                 </div>
                 <div class="event-modal-right">
-                    <div><label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">참여 멤버 (쉼표로 구분)</label><input type="text" id="eventMembers" placeholder=",로 구별 예)솜주먹,멤버2,멤버3" class="event-custom-input"></div>
+                    <div><label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">참여 멤버 (쉼표로 구분, 그룹명도 가능)</label><input type="text" id="eventMembers" placeholder=",로 구별 예)솜주먹,멤버2,그룹명" class="event-custom-input"></div>
                     <div><label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">공지 링크</label><input type="text" id="eventNoticeLink" placeholder="https://..." class="event-custom-input"></div>
                     <div>
                         <label style="display: block; font-weight: 800; margin-bottom: 6px; color: #7A5A2F;">포스터 / 썸네일 이미지</label>
@@ -366,7 +366,29 @@
         </div>
     </div>
     
-    <div id="memberModal" class="modal"><div class="modal-content"><h3 class="modal-title">멤버 관리</h3><div id="memberList" class="member-list"></div><div class="member-add-box"><h4 style="font-weight:900; margin-bottom:12px;">새 멤버 추가</h4><input type="text" id="newMemberName" class="admin-input" placeholder="멤버 이름 (닉네임)" style="margin-bottom: 8px;"><input type="text" id="newMemberId" class="admin-input" placeholder="SOOP 아이디" style="margin-bottom: 12px;"><input type="hidden" id="newMemberImg"><button class="btn btn-save" style="width:100%; padding:14px;" onclick="addMember()">추가하기</button></div><button class="btn btn-cancel" style="margin-top:15px;" onclick="closeModal('memberModal')">닫기</button></div></div>
+    <div id="memberModal" class="modal"><div class="modal-content"><h3 class="modal-title">멤버 관리</h3><div id="memberList" class="member-list"></div><div class="member-add-box"><h4 style="font-weight:900; margin-bottom:12px;">새 멤버 추가</h4><input type="text" id="newMemberName" class="admin-input" placeholder="멤버 이름 (닉네임)" style="margin-bottom: 8px;"><input type="text" id="newMemberId" class="admin-input" placeholder="SOOP 아이디" style="margin-bottom: 12px;"><input type="hidden" id="newMemberImg"><div style="display:flex; gap:8px;"><button class="btn btn-save" style="flex:1; padding:14px; background: var(--point-pink); color:#ffffff;" onclick="toggleGroupAddForm()">그룹추가</button><button class="btn btn-save" style="flex:1; padding:14px; background: var(--point-pink); color:#ffffff;" onclick="addMember()">추가하기</button></div></div>
+
+        <hr style="border:0; border-top:2px dashed #f1f5f9; margin:20px 0;">
+
+        <div class="group-manage-box">
+            <div style="display:flex; align-items:center; margin-bottom:12px;">
+                <h4 style="font-weight:900; margin:0;">그룹 관리</h4>
+            </div>
+            <div id="groupList" class="member-list"></div>
+
+            <div id="groupAddBox" class="member-add-box" style="display:none; margin-top:12px;">
+                <h4 id="groupAddBoxTitle" style="font-weight:900; margin-bottom:12px;">새 그룹 추가</h4>
+                <input type="hidden" id="editingGroupOriginalName" value="">
+                <input type="text" id="newGroupName" class="admin-input" placeholder="그룹 이름 (예: 방송팀)" style="margin-bottom: 12px;">
+                <input type="text" id="groupMemberSearch" class="admin-input" placeholder="멤버 검색" style="margin-bottom: 8px;" oninput="filterGroupMemberCheckboxes(this.value)">
+                <div id="groupMemberCheckboxes" style="max-height:180px; overflow-y:auto; border:1px solid #eee; border-radius:12px; padding:8px 10px; margin-bottom:12px; background:#fafaf9;"></div>
+                <div style="font-size:13px; font-weight:800; color:#7A5A2F; margin-bottom:6px;">선택된 멤버</div>
+                <div id="selectedGroupMembers" style="display:flex; flex-wrap:wrap; gap:6px; min-height:32px; padding:8px; border:1px dashed #e5e7eb; border-radius:12px; margin-bottom:12px;"></div>
+                <button id="groupSaveBtn" class="btn btn-save" style="width:100%; padding:14px;" onclick="addGroup()">그룹 저장하기</button>
+            </div>
+        </div>
+
+        <button class="btn btn-cancel" style="margin-top:15px;" onclick="closeModal('memberModal')">닫기</button></div></div>
     
     <div id="confirmModal" class="modal"><div class="modal-content" style="max-width: 320px; align-items: center; text-align: center;"><h3 id="confirmMessage" class="font-black text-lg mb-6"></h3><div class="btn-group" style="width: 100%;"><button class="btn btn-cancel" onclick="closeModal('confirmModal')">취소</button><button id="confirmBtn" class="btn btn-danger">삭제</button></div></div></div>
     

@@ -227,6 +227,7 @@ let events = {};
 let loadedMonths = new Set();
 let isSongbookLoaded = false;
 let members = {};
+let groups = {};
 let currentAMPM = '오전';
 let activeMemoTab = '메모';
 let activeDateId = '';
@@ -585,7 +586,9 @@ async function openMemberManager() {
 
     try {
         await loadMembersFromFirebase();
+        await loadGroupsFromFirebase();
         renderMemberList();
+        renderGroupList();
         const memberModal = document.getElementById('memberModal');
         if (memberModal) {
             memberModal.style.display = 'flex';
@@ -660,6 +663,216 @@ async function loadMembersFromFirebase() {
     });
 }
 
+async function loadGroupsFromFirebase() {
+    groups = {};
+    const snapshot = await getDocs(collection(db, 'groups'));
+    snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (!data || !data.name) return;
+        groups[data.name] = { name: data.name, memberNames: Array.isArray(data.memberNames) ? data.memberNames : [] };
+    });
+}
+
+// 일정에 적힌 members 문자열(쉼표 구분)을 실제 프로필 목록으로 확장.
+// 이름이 그룹명이면 해당 그룹에 속한 멤버들로 치환, 아니면 그대로 개인 멤버로 처리. 중복은 제거.
+function expandEventMembers(memberStr) {
+    const result = [];
+    const seen = new Set();
+    if (!memberStr) return result;
+    memberStr.split(',').forEach(nameRaw => {
+        const name = nameRaw.trim();
+        if (!name) return;
+        if (groups[name]) {
+            groups[name].memberNames.forEach(mn => {
+                if (seen.has(mn)) return;
+                seen.add(mn);
+                const m = members[mn] || { name: mn, img: `https://placehold.co/100x100?text=${encodeURIComponent(mn[0] || '')}` };
+                result.push(m);
+            });
+        } else {
+            if (seen.has(name)) return;
+            seen.add(name);
+            const m = members[name] || { name, img: `https://placehold.co/100x100?text=${encodeURIComponent(name[0] || '')}` };
+            result.push(m);
+        }
+    });
+    return result;
+}
+
+function renderGroupList() {
+    const list = document.getElementById('groupList');
+    if (!list) return;
+    list.innerHTML = '';
+    const groupNames = Object.keys(groups);
+    if (groupNames.length === 0) {
+        list.innerHTML = `<div style="color:#A09586; font-size:13px; font-weight:700; padding:6px 2px;">등록된 그룹이 없습니다.</div>`;
+        return;
+    }
+    groupNames.forEach(name => {
+        const g = groups[name];
+        const item = document.createElement('div');
+        item.className = 'member-list-item';
+        const memberLabel = (g.memberNames || []).join(', ') || '(멤버 없음)';
+        item.innerHTML = `<div style="flex:1;"><div style="font-weight:900;">${g.name}</div><div style="font-size:12px; color:#A09586; font-weight:700; margin-top:2px;">${memberLabel}</div></div><button class="font-bold" style="color:#7A5A2F; margin-right:6px;" onclick="editGroup('${g.name}')">수정</button><button class="text-red-400 font-bold" onclick="deleteGroup('${g.name}')">삭제</button>`;
+        list.appendChild(item);
+    });
+}
+
+function renderGroupMemberCheckboxes(preselected) {
+    const box = document.getElementById('groupMemberCheckboxes');
+    if (!box) return;
+    box.innerHTML = '';
+    const names = Object.keys(members);
+    const preset = new Set(preselected || []);
+    if (names.length === 0) {
+        box.innerHTML = `<div style="color:#A09586; font-size:13px; font-weight:700;">추가된 멤버가 없습니다. 먼저 멤버를 추가해주세요.</div>`;
+        updateSelectedGroupMembers();
+        return;
+    }
+    names.forEach(name => {
+        const label = document.createElement('label');
+        label.className = 'group-member-checkbox-label';
+        label.dataset.name = name.toLowerCase();
+        label.style.cssText = 'display:flex; align-items:center; gap:8px; padding:6px 4px; font-weight:700; cursor:pointer;';
+        label.innerHTML = `<input type="checkbox" class="group-member-checkbox" value="${name}" ${preset.has(name) ? 'checked' : ''} style="width:16px; height:16px; cursor:pointer;"> ${name}`;
+        box.appendChild(label);
+    });
+    updateSelectedGroupMembers();
+}
+
+// 체크박스 상태가 바뀔 때마다 "선택된 멤버" 칩 목록을 갱신 (이벤트 위임)
+document.addEventListener('change', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('group-member-checkbox')) {
+        updateSelectedGroupMembers();
+    }
+});
+
+function updateSelectedGroupMembers() {
+    const wrap = document.getElementById('selectedGroupMembers');
+    if (!wrap) return;
+    const checked = Array.from(document.querySelectorAll('.group-member-checkbox:checked')).map(cb => cb.value);
+    wrap.innerHTML = '';
+    if (checked.length === 0) {
+        wrap.innerHTML = `<span style="color:#A09586; font-size:13px; font-weight:700;">선택된 멤버가 없습니다.</span>`;
+        return;
+    }
+    checked.forEach(name => {
+        const chip = document.createElement('span');
+        chip.style.cssText = 'display:inline-flex; align-items:center; gap:6px; background: var(--point-pink); color:#ffffff; font-weight:800; font-size:13px; padding:6px 10px; border-radius:999px;';
+        chip.innerHTML = `${name} <button type="button" aria-label="${name} 제거" style="background:none; border:none; color:#ffffff; font-weight:900; cursor:pointer; padding:0; line-height:1;" onclick="removeSelectedGroupMember('${name}')">✕</button>`;
+        wrap.appendChild(chip);
+    });
+}
+
+function removeSelectedGroupMember(name) {
+    const cb = document.querySelector(`.group-member-checkbox[value="${CSS.escape(name)}"]`);
+    if (cb) cb.checked = false;
+    updateSelectedGroupMembers();
+}
+
+function filterGroupMemberCheckboxes(keyword) {
+    const box = document.getElementById('groupMemberCheckboxes');
+    if (!box) return;
+    const kw = (keyword || '').trim().toLowerCase();
+    const labels = box.querySelectorAll('.group-member-checkbox-label');
+    let visibleCount = 0;
+    labels.forEach(label => {
+        const match = !kw || label.dataset.name.includes(kw);
+        label.style.display = match ? 'flex' : 'none';
+        if (match) visibleCount++;
+    });
+    let emptyMsg = box.querySelector('.group-member-search-empty');
+    if (labels.length > 0 && visibleCount === 0) {
+        if (!emptyMsg) {
+            emptyMsg = document.createElement('div');
+            emptyMsg.className = 'group-member-search-empty';
+            emptyMsg.style.cssText = 'color:#A09586; font-size:13px; font-weight:700; padding:6px 4px;';
+            emptyMsg.innerText = '검색 결과가 없습니다.';
+            box.appendChild(emptyMsg);
+        }
+    } else if (emptyMsg) {
+        emptyMsg.remove();
+    }
+}
+
+function toggleGroupAddForm() {
+    const box = document.getElementById('groupAddBox');
+    if (!box) return;
+    const show = box.style.display === 'none' || !box.style.display;
+    if (show) {
+        document.getElementById('editingGroupOriginalName').value = '';
+        document.getElementById('groupAddBoxTitle').innerText = '새 그룹 추가';
+        document.getElementById('groupSaveBtn').innerText = '그룹 저장하기';
+        renderGroupMemberCheckboxes();
+        document.getElementById('newGroupName').value = '';
+        const searchInput = document.getElementById('groupMemberSearch');
+        if (searchInput) searchInput.value = '';
+        box.style.display = 'block';
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+function editGroup(name) {
+    const g = groups[name];
+    if (!g) return;
+    document.getElementById('editingGroupOriginalName').value = name;
+    document.getElementById('groupAddBoxTitle').innerText = `그룹 수정 (${name})`;
+    document.getElementById('groupSaveBtn').innerText = '수정 저장하기';
+    document.getElementById('newGroupName').value = name;
+    const searchInput = document.getElementById('groupMemberSearch');
+    if (searchInput) searchInput.value = '';
+    renderGroupMemberCheckboxes(g.memberNames || []);
+    filterGroupMemberCheckboxes('');
+    const box = document.getElementById('groupAddBox');
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function addGroup() {
+    const name = document.getElementById('newGroupName').value.trim();
+    if (!name) return showToast('그룹 이름을 입력해주세요.');
+    const checked = Array.from(document.querySelectorAll('.group-member-checkbox:checked')).map(cb => cb.value);
+    if (checked.length === 0) return showToast('그룹에 포함할 멤버를 한 명 이상 선택해주세요.');
+
+    const originalName = document.getElementById('editingGroupOriginalName').value;
+    const isEditing = !!originalName;
+    const isRenamed = isEditing && originalName !== name;
+
+    if (!isEditing && groups[name]) return showToast('이미 존재하는 그룹 이름입니다.');
+    if (isRenamed && groups[name]) return showToast('이미 존재하는 그룹 이름입니다.');
+
+    const id = `group_${encodeURIComponent(name)}`;
+    const data = { name, memberNames: checked };
+
+    try {
+        await setDoc(doc(db, 'groups', id), data);
+        if (isRenamed) {
+            await deleteDoc(doc(db, 'groups', `group_${encodeURIComponent(originalName)}`));
+        }
+        await loadGroupsFromFirebase();
+        renderGroupList();
+        document.getElementById('groupAddBox').style.display = 'none';
+        document.getElementById('editingGroupOriginalName').value = '';
+        showToast(isEditing ? `${name} 그룹이 수정되었습니다.` : `${name} 그룹이 추가되었습니다.`);
+    } catch (error) { showToast(`그룹 저장 실패: ${error.message}`); }
+}
+
+function deleteGroup(name) {
+    const btn = document.getElementById('confirmBtn');
+    document.getElementById('confirmMessage').innerText = `[${name}] 그룹을 삭제할까요?`;
+    btn.onclick = async () => {
+        try {
+            await deleteDoc(doc(db, 'groups', `group_${encodeURIComponent(name)}`));
+            delete groups[name];
+            renderGroupList();
+            closeModal('confirmModal');
+            showToast(`${name} 그룹이 삭제되었습니다.`);
+        } catch (error) { console.error(error); showToast('그룹 삭제에 실패했습니다.'); }
+    };
+    document.getElementById('confirmModal').style.display = 'flex';
+}
+
 async function loadEventsForMonth(year, month) {
     const monthKey = `${year}-${month}`;
     if (loadedMonths.has(monthKey)) return;
@@ -707,6 +920,7 @@ async function ensureMonthsLoadedForDate(date) {
 async function loadData() {
     try { 
         await loadMembersFromFirebase();
+        await loadGroupsFromFirebase();
         await loadMemos();
         try { await loadUpItems(); } catch (e) { console.log("UP 컬렉션 로드 실패:", e); }
     } catch (error) { console.error("데이터 로드 오류:", error); }
@@ -1495,9 +1709,7 @@ function showInfoByEvent(ev) {
     if (profs) {
         profs.innerHTML = '';
         if (ev.members) {
-            ev.members.split(',').forEach(nameRaw => {
-                const name = nameRaw.trim(); if (!name) return;
-                const m = members[name] || { name, img: `https://placehold.co/100x100?text=${encodeURIComponent(name[0] || '')}` };
+            expandEventMembers(ev.members).forEach(m => {
                 const card = document.createElement('div'); card.className = 'profile-card';
                 card.innerHTML = `<img src="${m.img}" class="profile-img" onerror="this.src='https://placehold.co/100x100?text=?'"><div class="profile-name">${m.name}</div>`;
                 profs.appendChild(card);
@@ -2568,9 +2780,7 @@ window.showDayInfo = function(dateId, dayEvents) {
 
             let profsHtml = '';
             if (ev.members) {
-                ev.members.split(',').forEach(nameRaw => {
-                    const name = nameRaw.trim(); if (!name) return;
-                    const m = members[name] || { name, img: `https://placehold.co/100x100?text=${encodeURIComponent(name[0] || '')}` };
+                expandEventMembers(ev.members).forEach(m => {
                     profsHtml += `
                         <!-- 카드 전체 폭을 늘리고, 가운데 정렬 속성 추가 -->
                         <div class="profile-card" style="display: flex; flex-direction: column; align-items: center; width: 90px; gap: 8px;">
@@ -2804,6 +3014,8 @@ Object.assign(window, {
     handleEventImgUpload, addMember, deleteMember,deletePopupImage,
     handlePopupImgUpload: window.handlePopupImgUpload,
     openMemberManager, renderMemberList, showToast, closeModal, formatTime12h,
+    renderGroupList, toggleGroupAddForm, addGroup, deleteGroup, loadGroupsFromFirebase, filterGroupMemberCheckboxes,
+    editGroup, removeSelectedGroupMember,
     setAMPM, openAddModal, saveEvent, deleteEvent, showInfo,
     toggleMemo, openMemoInput, closeMemoInput, saveMemoItem, selectMemoTab, openMonthPicker, changePickerYear,
     toggleUpBoard, toggleMobileUpBoard, loadUpItems, deleteUpItem,
